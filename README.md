@@ -5,13 +5,20 @@ All about render quality and customizability.
 
 
 ### Summary
-- **Design philosophy**
-- **Setup & use**
-- **Definitions**
-- **Architecture**
-- **Core classes**
-- **Combinators**
-- **Credits & stuff**
+- [ComBox](#combox)
+  - [About](#about)
+    - [Summary](#summary)
+  - [Design philosophy](#design-philosophy)
+  - [Definitions](#definitions)
+  - [Architecture](#architecture)
+  - [Setup \& use](#setup--use)
+  - [Core classes](#core-classes)
+    - [Color](#color)
+    - [ImageHandler](#imagehandler)
+    - [MediaParser](#mediaparser)
+    - [Renderer](#renderer)
+  - [Combinators](#combinators)
+  - [Credits \& stuff](#credits--stuff)
 
 
 ## Design philosophy
@@ -70,6 +77,32 @@ Though you can achieve quite good speeds by avoiding or restricting some quality
 > A render is rough when there is a big difference in color in it's texels.  
 > A render is smooth when there is very little difference in color in it's texels.
 
+**Combinator**
+> An object that implements the functions :
+> combinator:onPaletteChange()
+> combinator:onImageChange()
+> combinator:findCombination(u,v,image,palette) -> [char, char, char]
+> Used to find the combination to put on each texel of the render.
+> For more details, look in combinator files like SimpleCombinator.lua
+
+
+## Architecture
+All of ComBox's code is divided into classes in separate files.
+
+There core classes for the main components of the renderer and commonly handled data (colors,images)
+They are directly in the ComBox folder.
+
+The system is centered around an instance of *Renderer*.
+The renderer is used to setup the render, choose it's size and position, how things will be rendered,...
+Then finaly actualy do the rendering and displaying on screen.
+
+The main idea of ComBox's rendering is to offload the task of choosing the combination of each texel to a dedicated object.
+These objects are called **Combinators**.
+Different combinators give different results : they are each made to have a specific style/effect.
+They are made to be very customisable and cover many different usecases.
+You can implement your own combinators by following the same method names (see SimpleCombinator.lua for exemple)
+
+
 ## Setup & use
 - Using the *installer script* :  
     **Setup**  
@@ -90,7 +123,6 @@ Though you can achieve quite good speeds by avoiding or restricting some quality
 
     >to import a combinator and use it you juste have to require it from the combinators folder,  
     >**ex:** local FastCharCombinator = require "combox.combinators.FastCharCombinator":new()  
-
 
 **General Use**
 
@@ -140,11 +172,6 @@ Here is a small exemple script that displays uvs :
 ```
 **Result :**
 ![screenshot1.png](images/screenshot1.png)
-
-
-## Architecture
-The actual rendering is done by "combinators" objects.  
-These tell the system what combination to put at each point or the render.
 
 
 ## Core classes
