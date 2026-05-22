@@ -4,16 +4,14 @@ An all-in-one rendering system for CC:Tweaked.
 All about render quality and customizability.
 
 
-
-
 ### Summary
-- Design philosophy
-- Setup & use
-- Definitions
-- Architecture
-- Core classes
-- Combinators
-- Credits & stuff
+- **Design philosophy**
+- **Setup & use**
+- **Definitions**
+- **Architecture**
+- **Core classes**
+- **Combinators**
+- **Credits & stuff**
 
 
 ## Design philosophy
@@ -33,6 +31,7 @@ Modularity in the form of :
   
 These points are sometimes prioritised over maximal optimisation, leading to some processes being slower than other solutions.  
 Though you can achieve quite good speeds by avoiding or restricting some quality-focused features. 
+
 
 ## Definitions
 
@@ -92,6 +91,7 @@ Though you can achieve quite good speeds by avoiding or restricting some quality
     >to import a combinator and use it you juste have to require it from the combinators folder,  
     >**ex:** local FastCharCombinator = require "combox.combinators.FastCharCombinator":new()  
 
+
 **General Use**
 
 To use ComBox in our program we first need to create a **Renderer** instance.  
@@ -138,9 +138,9 @@ Here is a small exemple script that displays uvs :
     screen:render(image) -- we calculate all the combination to display on our screen
     .display() -- we display the combinations from render
 ```
-
 **Result :**
 ![screenshot1.png](images/screenshot1.png)
+
 
 ## Architecture
 The actual rendering is done by "combinators" objects.  
@@ -148,32 +148,170 @@ These tell the system what combination to put at each point or the render.
 
 
 ## Core classes
+More detailed explanations can be found in the comments of the relevant class files.
 
 ### Color
-Usage  
 ```lua
-local Color = require "Color" -- you can also use combox.Color if you require combox
+local Color = require "Color" -- require the class, path depends on your instalation and file path
+
+--[[
+    INSTANCIATION
+]]
 --                r   g   b   a
-local rgb = Color(0.1,0.4,0.8,1) -- same as Color:new(0.1,0.4,0.8,1)
-local rgbShort = Color(0.5,1) -- same as Color(0.5,1,0,1)
-local hex = Color("#FF0000") -- same as Color(1,0,0,1)
-local hexAlpha = Color("#00FF0000") -- same as Color(0,1,0,0)
+local rgb = Color(0.1,0.4,0.8,1)       -- you can also use Color:new(0.1,0.4,0.8,1)
+local rgbShort = Color(0.5,1)          -- parameters are optional, equivalent to Color(0.5,1,0,1)
+local hex = Color("#FF0000")         -- leading # is optional, equivalent to Color(1,0,0,1)
+local hexAlpha = Color("#00FF0000")  -- leading # is optional, equivalent to Color(0,1,0,0) or Color.fromHex("#00FF0000")
+
+--[[
+    USE
+]]
+-- split colors into their components (r,g,b,a)
+local r,g,b,a = rgb[1], rgb[2], rgb[3], rgb[4]
+
+-- calculate distance between two colors
+local distance = rgb:distance(otherColor)
+
+-- Mix two colors with a coeficient
+local newColor = rgb:mix(otherColor, k)
+
+-- Find the closest match to a color in a given palette, returns an index
+local colorIndex = rgb:findClosest(palette)
+
+-- convert to Oklab colorspace (very slow)
+local oklabColor = rgb:toOklab()
+-- distance between two colors in Oklab (very slow)
+local oklabDistance = rgb:distanceOklab(otherColor) -- does rgb:toOklab() :distance( otherColor:toOklab() )
+
+-- convert from HEX
+local newColor = Color.fromHex("#00FF0000")
+-- convert to HEX
+local hexString = rgb:toHex()
+
+-- deep copy of a color
+local duplicateColor = rgb:duplicate()
+
+-- linearize color (normal formula)
+local linearColor = rgb:linearize();
+-- linearize color (faster ^2.2 formula)
+local linearColor2 = rgb:gamma2();
+
+-- hash color to a specified size (see function code for details)
+local hash = rgb:toHash(100); 
 ```
+
 ### ImageHandler
+```lua
+local ImageHandler = require "ImageHandler" -- require the class, path depends on your instalation and file path
+
+--[[
+    INSTANCIATION
+]]
+-- create an empty (full black) image 
+local image = ImageHandler:new(sx,sy)
+-- ImageHandlers can also be created from image files using the MediaParser class (see below)
+
+--[[
+    USE
+]]
+-- shalow copy of the image
+local newImage = image:copy()
+-- deep duplication of the image (copies the colors in the image too)
+local newImage = image:duplicate()
+
+-- resize the image by taking the closest pixel's value
+image:resize(newSx, newSy)
+-- resize the image by taking the average of local pixels colors
+image:resizeMean(newSx,newSy)
+
+-- get value of pixel at u,v
+local pixelColor = image:getPx(u,v)
+-- set value of the pixel at u,v
+image:setPx(u,v,color)
+
+-- finds unique colors in the image, used by findPalette()
+image:findUniqueColors()
+-- returns the "best" palette to render the image
+local palette = image:findPalette()
+
+-- applies a shader to the image
+image:process(shader)
+-- applied a shader to the image, creates new image with the result
+local newImage = image:map(shader,sx,sy)
+
+-- linearize all colors in the image using Color:linearize()
+image:linearize()
+-- linearize all colors in the image using Color:gamma2() function (faster than linearize)
+image:gamma2()
+```
+
 ### MediaParser
+```lua
+local MediaParser = require "MediaParser" -- require the class, path depends on your instalation and file path
+
+-- This is kind of like an abstract class, it doesn't have instances
+-- it is only used to create instances of ImageHandler
+
+--[[
+    USE
+]]
+-- Returns the image (imageHandler object) contained in the file at the given path
+local image = MediaParser:open(path)
+
+-- Returns the image (imageHandler object) contained in the file at the given path, parsed with the given format
+-- (you should probably always use open() )
+local image = MediaParser:parse(path,type)
+```
+
+
 ### Renderer
+```lua
+local Renderer = require "Renderer" -- require the class, path depends on your instalation and file path
+
+--[[
+    INSTANCIATION
+]]
+local renderer = Renderer:new({
+    term= term,     -- term to display to, and use for default size
+    combinators= {combinator1,combinator2}, -- combinators that can be used in the render
+    sx= 20,         -- size x
+    sy= 20,         -- size y
+    px= 0,          -- position x
+    py= 0,          -- position y
+    mask= mask      -- an ImageHandler of size (sx,sy), filled with the combinators give to the renderer
+})
+
+--[[
+    USE
+]]
+-- get the combinator to be used at (u,v)
+local usedCombinator = renderer:getCombinator(u,v)
+-- set what combinator to use at (u,v)
+renderer:setMaskAt(u,v,combinator)
+
+-- resize the renderer and it's mask
+renderer:resize(sx,sy)
+
+-- actual rendering of an image with a given palette
+local render = renderer:render(image,palette)
+
+-- show a render on screen
+renderer:display(render)
+-- or
+render:display()
+```
 
 
 ## Combinators
 
-### SimpleCombinator 
-### CharCombinator 
-### FastCharCombinator 
-### MathCharCombinator 
-### SquarePixelCombinator 
-### FlowCombinator 
-### VerboseCombinator 
-### ASCIICombinator 
+- ### SimpleCombinator 
+- ### CharCombinator 
+- ### FastCharCombinator 
+- ### MathCharCombinator 
+- ### SquarePixelCombinator 
+- ### FlowCombinator 
+- ### VerboseCombinator 
+- ### ASCIICombinator 
 
 
 ## Credits & stuff
