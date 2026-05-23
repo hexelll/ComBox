@@ -153,6 +153,7 @@ It takes a width and a height as parameters.
 
 Once we have our image we can render and display it.
 > The size of the image doesn't have to match the renderer.  
+> (the image will be streched to fit)
 
 Here is a small exemple script that displays uvs :  
 ```lua
@@ -167,15 +168,15 @@ Here is a small exemple script that displays uvs :
         return combox.Color(u,v) -- equivalent to Color:new(u,v,0,1)
     end) 
 
-    screen:render(image) -- we calculate all the combination to display on our screen
-    .display() -- we display the combinations from render
+    screen:render(image) -- we calculate all the combinations to display on our screen
+    .display() -- we display the render we just generated
 ```
 **Result :**
 ![screenshot1.png](images/screenshot1.png)
 
 
 ## Core classes
-More detailed explanations can be found in the comments of the relevant class files.
+>More detailed explanations can be found in the comments of the relevant class files.
 
 ### Color
 ```lua
@@ -331,14 +332,72 @@ render:display()
 
 ## Combinators
 
+Here is a set of pre-made combinators included in ComBox right now.  
+More combinators may come in future updates.  
+
+**And don't forget you can make custom combinators yourself, or give us ideas for new ones.**  
+
+>More information, like parameters and details on the logic behind the render, can be found in each combinator file.
+
 - ### SimpleCombinator 
-- ### CharCombinator 
-- ### FastCharCombinator 
-- ### MathCharCombinator 
+    The simplest way to display images on a CC term :
+    Using texels as rectangle "pixels" filled with a solid color. 
+    
+    "Pixels" being a solid color greatly limits color accuracy (because of the 16 color palette).
+
+
 - ### SquarePixelCombinator 
+    Used to render images using square "pixels".
+    
+    Square pixels allow for higher resolution without any artefacts.
+    It is very fast, usefull for realtime use.
+
+    "Pixels" being a solid color still greatly limits color accuracy (because of the 16 color palette).
+
+
+- ### CharCombinator 
+    Made to maximise color fidelity.
+    Uses a combination of text & background color mixed by a character to look closer to the desired color.
+    
+    This method sacrifies resolution and has a lot of visual noise, 
+    but achieves very nice colors in renders, especialy viewed from afar.
+    
+    There are multiple implementations of this idea (every combinator named with "Char").
+    This implementation allows you to choose the smoothness of the render, to reduce noise at the cost of losing color fidelity. 
+    But it is extremely slow because of state of the art Bruteforce™ technology.
+
+
+- ### FastCharCombinator 
+    An implementation of the CharCombinator idea, focused entirely on speed.
+    
+    This version is consistenlty pretty smooth but less color accurate than others.
+    It also does not have as many customisation option as other Char combinators. 
+
+- ### MathCharCombinator 
+    An implementation of the CharCombinator idea, focused mainly on color accuracy.
+
+    This version is very color accurate but quite noisy upclose.
+    It is a more optimised version of CharCombinator but loses the adjustable smoothness option.
+
+
 - ### FlowCombinator 
+    This is a combinator meant to follow the coutours of the image.
+    
+    It works by detecting high changes in color, finding the angle of that change
+    and assigning a corresponding character.
+    
+
 - ### VerboseCombinator 
+    This combinator will write text on screen depending on the desired color of the texel.
+    
+    It can be used to spell out colors where they appear or describe elements on the image.
+    It is not meant to create high fidelity renders of images, but it is very funny.
+
+
 - ### ASCIICombinator 
+    This is a combinator meant to achieve a classic retro ascii look
+    
+    It works by using the lightness of the pixel as an index into a table of characters.
 
 
 ## Credits & stuff
