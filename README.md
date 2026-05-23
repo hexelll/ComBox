@@ -172,7 +172,7 @@ Here is a small exemple script that displays uvs :
     .display() -- we display the render we just generated
 ```
 **Result :**
-![screenshot1.png](images/screenshot1.png)
+![uvRenders.png](exempleImages/uvRender.png)
 
 
 ## Core classes
@@ -339,12 +339,17 @@ More combinators may come in future updates.
 
 >More information, like parameters and details on the logic behind the render, can be found in each combinator file.
 
+- ### Demonstration
+    To demonstrate we will use the different combinators to display this cat :  
+    ![gatoOriginal.png](exempleImages/gatoOriginal.png)
+
 - ### SimpleCombinator 
     The simplest way to display images on a CC term :
     Using texels as rectangle "pixels" filled with a solid color. 
     
     "Pixels" being a solid color greatly limits color accuracy (because of the 16 color palette).
 
+    ![gatoSimpleRender.png](exempleImages/gatoSimpleRender.png)
 
 - ### SquarePixelCombinator 
     Used to render images using square "pixels".
@@ -354,6 +359,7 @@ More combinators may come in future updates.
 
     "Pixels" being a solid color still greatly limits color accuracy (because of the 16 color palette).
 
+    ![gatoSquareRender.png](exempleImages/gatoSquareRender.png)
 
 - ### CharCombinator 
     Made to maximise color fidelity.
@@ -366,12 +372,13 @@ More combinators may come in future updates.
     This implementation allows you to choose the smoothness of the render, to reduce noise at the cost of losing color fidelity. 
     But it is extremely slow because of state of the art Bruteforce™ technology.
 
-
 - ### FastCharCombinator 
     An implementation of the CharCombinator idea, focused entirely on speed.
     
     This version is consistenlty pretty smooth but less color accurate than others.
-    It also does not have as many customisation option as other Char combinators. 
+    It also does not have as many customisation option as other Char combinators.
+
+    ![gatoFastCharRender.png](exempleImages/gatoFastCharRender.png)
 
 - ### MathCharCombinator 
     An implementation of the CharCombinator idea, focused mainly on color accuracy.
@@ -379,13 +386,15 @@ More combinators may come in future updates.
     This version is very color accurate but quite noisy upclose.
     It is a more optimised version of CharCombinator but loses the adjustable smoothness option.
 
+    ![gatoMathCharRender.png](exempleImages/gatoMathCharRender.png)
 
 - ### FlowCombinator 
     This is a combinator meant to follow the coutours of the image.
     
     It works by detecting high changes in color, finding the angle of that change
     and assigning a corresponding character.
-    
+
+    ![gatoFlowRender.png](exempleImages/gatoFlowRender.png)
 
 - ### VerboseCombinator 
     This combinator will write text on screen depending on the desired color of the texel.
@@ -393,11 +402,14 @@ More combinators may come in future updates.
     It can be used to spell out colors where they appear or describe elements on the image.
     It is not meant to create high fidelity renders of images, but it is very funny.
 
+    ![gatoVerboseRender.png](exempleImages/gatoVerboseRender.png)
 
 - ### ASCIICombinator 
     This is a combinator meant to achieve a classic retro ascii look
     
     It works by using the lightness of the pixel as an index into a table of characters.
+
+    ![gatoAsciiRender.png](exempleImages/gatoAsciiRender.png)
 
 
 ## Credits & stuff
