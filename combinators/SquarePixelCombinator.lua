@@ -3,7 +3,7 @@
     This is a combinator meant to have square pixels, this means that the size of the image you pass
     to Renderer.render should be 3/2 times larger than the screen resolution, this can be done with
     image:resize(sx,math.floor(sy*3/2)) for the smallest image possible.
-    It is fast and suitable for realtime use, but it lacks in terms of accuracy on big screens compared to
+    It is fast and suitable for realtime use, but it lacks in terms of color accuracy on big screens compared to
     char combinators.
 
     SquarePixelCombinator: {

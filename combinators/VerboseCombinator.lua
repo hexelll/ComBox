@@ -1,7 +1,7 @@
 --[[
 
     This combinator will write text on screen depending on the desired color of the texel.
-    This can be used to spell out colors where they appear or describe elements on the image.
+    It can be used to spell out colors where they appear or describe elements on the image.
     This is not meant to create high fidelity renders of images, but it is very funny.
 
     VerboseCombinator: {
