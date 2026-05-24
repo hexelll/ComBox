@@ -158,10 +158,12 @@ Once we have our image we can render and display it.
 Here is a small exemple script that displays uvs :  
 ```lua
     local FastCharCombinator = require("combox.combinators.FastCharCombinator"):new() -- we create a new FastCharCombinator instance, we don't give it a parameters table so it will use the default
+    
     local Renderer = require "combox.Renderer"
     local screen = Renderer:new{ -- we create the object that will allow us to display images to a screen
         combinators = {FastCharCombinator} -- we define what combinator we want to use
     }
+    
     local ImageHandler = require "combox.ImageHandler"
     local image = ImageHandler:new(screen.sx,screen.sy) -- we create an image with the same size as our screen
     image:process(function(self,u,v) -- we apply a shader to our image, see ImageHandler.lua for more info
@@ -371,6 +373,8 @@ More combinators may come in future updates.
     There are multiple implementations of this idea (every combinator named with "Char").
     This implementation allows you to choose the smoothness of the render, to reduce noise at the cost of losing color fidelity. 
     But it is extremely slow because of state of the art Bruteforce™ technology.
+
+    ![gatoCharRender.png](exempleImages/gatoCharRender.png)
 
 - ### FastCharCombinator 
     An implementation of the CharCombinator idea, focused entirely on speed.
