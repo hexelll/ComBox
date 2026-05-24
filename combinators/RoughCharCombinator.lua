@@ -144,7 +144,7 @@ function RoughCharCombinator:findCombination(u,v,image,palette)
             end
         end
 
-        local combination = {string.char(best[2]),hexTable[best[3]],hexTable[best[4]]}
+        local combination = {string.char(best[2]),hexTable[best[4]],hexTable[best[3]]}
   
         self.cacheCombination[index] = combination
 

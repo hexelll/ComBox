@@ -85,6 +85,11 @@ end
 ]]
 function CharCombinator:onPaletteChange(palette,renderer)
 
+    print("char:")
+    for i,col in ipairs(palette)do
+        print(col)
+    end
+
     local combinationTable = {}
     for textColNum=1,#palette do
 
@@ -179,7 +184,7 @@ function CharCombinator:findCombination(u,v,image,palette)
             end
             local row = combinationTable[textColNum]
 
-            for backColNum = 1, #row do
+            for backColNum = 1, #palette do
                 if (os.clock()-lastt) > 5 then
                     sleep()
                     lastt = os.clock()
@@ -246,7 +251,7 @@ function CharCombinator:findCombination(u,v,image,palette)
         end
         local bestofbests = best[bestIdx]
 
-        combination = {string.char(bestofbests[3]),hexTable[bestofbests[1]],hexTable[bestofbests[2]]}
+        local combination = {string.char(bestofbests[3]),hexTable[bestofbests[2]],hexTable[bestofbests[1]]}
 
         if (os.clock()-lastt) > 5 then
             sleep()
