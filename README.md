@@ -19,6 +19,7 @@ All about render quality and customizability.
     - [Renderer](#renderer)
   - [Combinators](#combinators)
   - [Credits \& stuff](#credits--stuff)
+  - [Some cool renders](#some-cool-renders)
 
 
 ## Design philosophy
@@ -425,3 +426,38 @@ If you have questions, ideas, critisism, or need any help, come talk about it in
 With inspiration from other CC:T renderers (pixelbox, bixelbox, ShrekBox).
 
 
+## Some cool renders 
+
+![exampleSunset.png](exempleImages/exampleSunset.png)
+**Pure gradient flex**
+> Made with MathCharCombinator
+---
+
+![exampleHat.png](exempleImages/exampleHat.png)
+**Steampunk my beloved**
+> Made with MathCharCombinator
+---
+
+![exampleKirby.png](exempleImages/exampleKirby.png)
+**Kirby, now with colorblind accessibility**
+> Made with VerboseCombinator
+---
+
+![exampleSpiral.png](exempleImages/exampleSpiral.png)
+**You are hypnoticaly compelled to star this repo**
+> Made with FlowCombinator and a shader
+---
+
+![exampleTree.png](exempleImages/exampleTree.png)
+**Who's that tree ? ~Pokemon music~**
+> Made with ASCIICombinator and FlowCombinator on the edges 
+---
+
+![exampleCloud.png](exempleImages/exampleCloud.png)
+**We live in the matrix, clouds are a simulation**
+> Made with MathCharCombinator and FlowCombinator on the edges 
+---
+
+![exampleDjungelskog.png](exempleImages/exampleDjungelskog.png)
+**Djungelskog looking a bit fried today**
+> Made with ASCIICombinator, SquarePixelCombinator on the edges and a weird palette
