@@ -4,8 +4,8 @@ local Color = require "Color"
 local Renderer = require "Renderer"
 local MediaParser = require "MediaParser"
 
-local FastCharCombinator = require ("combinators.FastCharCombinator"):new()
-local SquarePixelCombinator = require ("combinators.SquarePixelCombinator"):new()
+local mainCombinator = require ("combinators."..arg[2]):new()
+local edgeCombinator = require ("combinators."..arg[3]):new()
 
 local imagePath = arg[1]
 
@@ -16,13 +16,13 @@ end
 
 local screen = Renderer:new{
     term=mon,
-    combinators={ FastCharCombinator }
+    combinators={ mainCombinator, edgeCombinator}
 }
 
 local image = MediaParser:open(imagePath)
-if arg[2] == "nearest" then -- faster but pretty ugly
+if arg[4] == "nearest" then -- faster but pretty ugly
     image:resize(screen.sx,screen.sy)
-elseif arg[2] == "mean" then -- slower but much nicer
+elseif arg[4] == "mean" then -- slower but much nicer
     image:resize(200,200) -- we resize to 200 by 200 so it doesn't take too long to compute
         :resizeMean(
             screen.sx,
@@ -38,7 +38,7 @@ local function makeMask(image)
         local color = self:getPx(u,v)
         for x=-1,1 do
             for y=-1,1 do
-                ku,kv = x/(self.sx-1),y/(self.sy-1)
+                local ku,kv = x/(self.sx-1),y/(self.sy-1)
                 local px = self:getPx(u+ku,v+kv)
                 px = px and px or Color:new()
                 local d = color:distance(px)
@@ -48,10 +48,10 @@ local function makeMask(image)
         end
         local l = math.sqrt(vec[1]*vec[1]+vec[2]*vec[2])
         if l > 0.1 then
-            return SquarePixelCombinator
+            return edgeCombinator
         end
    
-        return FastCharCombinator
+        return mainCombinator
     end,screen.sx,screen.sy)
 end
 
