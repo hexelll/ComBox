@@ -458,6 +458,29 @@ With inspiration from other CC:T renderers (pixelbox, bixelbox, ShrekBox).
 > Made with MathCharCombinator and FlowCombinator on the edges 
 ---
 
+![exampleClood.png](exempleImages/exampleClood.png)  
+**Just couldn't let this gorgeous clood not get some love**  
+> Made with MathCharCombinator and SquarePixelCombinator on the edges  
+---
+
+![lightshow1.gif](exempleImages/lightshow1.gif)   
+**You can also make things that move yay, shader adapted from [https://www.shadertoy.com/view/XsXXDn](https://www.shadertoy.com/view/XsXXDn)**  
+> Made with SquarePixelCombinator  
+---
+
+![lightshow2.gif](exempleImages/lightshow2.gif)   
+**You can also make things that move bis, shader adapted from [https://www.shadertoy.com/view/XsXXDn](https://www.shadertoy.com/view/mtyGWy)**  
+> Made with SquarePixelCombinator  
+---
+
+![plotter1.gif](exempleImages/plotter1.gif)  
+**This is an example from [Plotter](https://github.com/hexelll/ComboxPlotter), a small library for plotting points that depends on ComBox**  
+> Made with MathCharCombinator
+---  
+
 ![exampleDjungelskog.png](exempleImages/exampleDjungelskog.png)
 **Djungelskog looking a bit fried today**
 > Made with ASCIICombinator, SquarePixelCombinator on the edges and a weird palette
+---
+
+
