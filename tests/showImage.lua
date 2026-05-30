@@ -3,7 +3,7 @@ package.path = package.path .. ";../?.lua" -- this is used so we can require fro
 local Renderer = require "Renderer"
 local MediaParser = require "MediaParser"
 
-local FastCharCombinator = require ("combinators."..arg[3]):new()
+local combinator = require ("combinators."..arg[3]):new()
 
 local imagePath = arg[1]
 
