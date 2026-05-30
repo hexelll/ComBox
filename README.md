@@ -470,7 +470,7 @@ With inspiration from other CC:T renderers (pixelbox, bixelbox, ShrekBox).
 
 ![lightshow2.gif](exempleImages/lightshow2.gif)   
 **You can also make things that move bis, shader adapted from [https://www.shadertoy.com/view/XsXXDn](https://www.shadertoy.com/view/mtyGWy)**  
-> Made with SquarePixelCombinator  
+> Made with FastCharCombinator  
 ---
 
 ![plotter1.gif](exempleImages/plotter1.gif)  
