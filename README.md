@@ -4,16 +4,22 @@ An all-in-one rendering system for CC:Tweaked.
 All about render quality and customizability.
 
 
-
-
 ### Summary
-- Design philosophy
-- Setup & use
-- Definitions
-- Architecture
-- Core classes
-- Combinators
-- Credits & stuff
+- [ComBox](#combox)
+  - [About](#about)
+    - [Summary](#summary)
+  - [Design philosophy](#design-philosophy)
+  - [Definitions](#definitions)
+  - [Architecture](#architecture)
+  - [Setup \& use](#setup--use)
+  - [Core classes](#core-classes)
+    - [Color](#color)
+    - [ImageHandler](#imagehandler)
+    - [MediaParser](#mediaparser)
+    - [Renderer](#renderer)
+  - [Combinators](#combinators)
+  - [Credits \& stuff](#credits--stuff)
+  - [Some cool renders](#some-cool-renders)
 
 
 ## Design philosophy
@@ -33,6 +39,7 @@ Modularity in the form of :
   
 These points are sometimes prioritised over maximal optimisation, leading to some processes being slower than other solutions.  
 Though you can achieve quite good speeds by avoiding or restricting some quality-focused features. 
+
 
 ## Definitions
 
@@ -70,6 +77,32 @@ Though you can achieve quite good speeds by avoiding or restricting some quality
 > Basicaly comes down to the difference between the text and background color in texels.  
 > A render is rough when there is a big difference in color in it's texels.  
 > A render is smooth when there is very little difference in color in it's texels.
+
+**Combinator**
+> An object that implements the functions :
+> combinator:onPaletteChange()
+> combinator:onImageChange()
+> combinator:findCombination(u,v,image,palette) -> [char, char, char]
+> Used to find the combination to put on each texel of the render.
+> For more details, look in combinator files like SimpleCombinator.lua
+
+
+## Architecture
+All of ComBox's code is divided into classes in separate files.
+
+There core classes for the main components of the renderer and commonly handled data (colors,images)
+They are directly in the ComBox folder.
+
+The system is centered around an instance of *Renderer*.
+The renderer is used to setup the render, choose it's size and position, how things will be rendered,...
+Then finaly actualy do the rendering and displaying on screen.
+
+The main idea of ComBox's rendering is to offload the task of choosing the combination of each texel to a dedicated object.
+These objects are called **Combinators**.
+Different combinators give different results : they are each made to have a specific style/effect.
+They are made to be very customisable and cover many different usecases.
+You can implement your own combinators by following the same method names (see SimpleCombinator.lua for exemple)
+
 
 ## Setup & use
 - Using the *installer script* :  
@@ -121,59 +154,267 @@ It takes a width and a height as parameters.
 
 Once we have our image we can render and display it.
 > The size of the image doesn't have to match the renderer.  
+> (the image will be streched to fit)
 
 Here is a small exemple script that displays uvs :  
 ```lua
     local FastCharCombinator = require("combox.combinators.FastCharCombinator"):new() -- we create a new FastCharCombinator instance, we don't give it a parameters table so it will use the default
+    
     local Renderer = require "combox.Renderer"
     local screen = Renderer:new{ -- we create the object that will allow us to display images to a screen
         combinators = {FastCharCombinator} -- we define what combinator we want to use
     }
+    
     local ImageHandler = require "combox.ImageHandler"
     local image = ImageHandler:new(screen.sx,screen.sy) -- we create an image with the same size as our screen
     image:process(function(self,u,v) -- we apply a shader to our image, see ImageHandler.lua for more info
         return combox.Color(u,v) -- equivalent to Color:new(u,v,0,1)
     end) 
 
-    screen:render(image) -- we calculate all the combination to display on our screen
-    .display() -- we display the combinations from render
+    screen:render(image) -- we calculate all the combinations to display on our screen
+    .display() -- we display the render we just generated
 ```
-
 **Result :**
-![screenshot1.png](images/screenshot1.png)
-
-## Architecture
-The actual rendering is done by "combinators" objects.  
-These tell the system what combination to put at each point or the render.
+![uvRenders.png](exempleImages/uvRender.png)
 
 
 ## Core classes
+>More detailed explanations can be found in the comments of the relevant class files.
 
 ### Color
-Usage  
 ```lua
-local Color = require "Color" -- you can also use combox.Color if you require combox
+local Color = require "Color" -- require the class, path depends on your instalation and file path
+
+--[[
+    INSTANCIATION
+]]
 --                r   g   b   a
-local rgb = Color(0.1,0.4,0.8,1) -- same as Color:new(0.1,0.4,0.8,1)
-local rgbShort = Color(0.5,1) -- same as Color(0.5,1,0,1)
-local hex = Color("#FF0000") -- same as Color(1,0,0,1)
-local hexAlpha = Color("#00FF0000") -- same as Color(0,1,0,0)
+local rgb = Color(0.1,0.4,0.8,1)       -- you can also use Color:new(0.1,0.4,0.8,1)
+local rgbShort = Color(0.5,1)          -- parameters are optional, equivalent to Color(0.5,1,0,1)
+local hex = Color("#FF0000")         -- leading # is optional, equivalent to Color(1,0,0,1)
+local hexAlpha = Color("#00FF0000")  -- leading # is optional, equivalent to Color(0,1,0,0) or Color.fromHex("#00FF0000")
+
+--[[
+    USE
+]]
+-- split colors into their components (r,g,b,a)
+local r,g,b,a = rgb[1], rgb[2], rgb[3], rgb[4]
+
+-- calculate distance between two colors
+local distance = rgb:distance(otherColor)
+
+-- Mix two colors with a coeficient
+local newColor = rgb:mix(otherColor, k)
+
+-- Find the closest match to a color in a given palette, returns an index
+local colorIndex = rgb:findClosest(palette)
+
+-- convert to Oklab colorspace (very slow)
+local oklabColor = rgb:toOklab()
+-- distance between two colors in Oklab (very slow)
+local oklabDistance = rgb:distanceOklab(otherColor) -- does rgb:toOklab() :distance( otherColor:toOklab() )
+
+-- convert from HEX
+local newColor = Color.fromHex("#00FF0000")
+-- convert to HEX
+local hexString = rgb:toHex()
+
+-- deep copy of a color
+local duplicateColor = rgb:duplicate()
+
+-- linearize color (normal formula)
+local linearColor = rgb:linearize();
+-- linearize color (faster ^2.2 formula)
+local linearColor2 = rgb:gamma2();
+
+-- hash color to a specified size (see function code for details)
+local hash = rgb:toHash(100); 
 ```
+
 ### ImageHandler
+```lua
+local ImageHandler = require "ImageHandler" -- require the class, path depends on your instalation and file path
+
+--[[
+    INSTANCIATION
+]]
+-- create an empty (full black) image 
+local image = ImageHandler:new(sx,sy)
+-- ImageHandlers can also be created from image files using the MediaParser class (see below)
+
+--[[
+    USE
+]]
+-- shalow copy of the image
+local newImage = image:copy()
+-- deep duplication of the image (copies the colors in the image too)
+local newImage = image:duplicate()
+
+-- resize the image by taking the closest pixel's value
+image:resize(newSx, newSy)
+-- resize the image by taking the average of local pixels colors
+image:resizeMean(newSx,newSy)
+
+-- get value of pixel at u,v
+local pixelColor = image:getPx(u,v)
+-- set value of the pixel at u,v
+image:setPx(u,v,color)
+
+-- finds unique colors in the image, used by findPalette()
+image:findUniqueColors()
+-- returns the "best" palette to render the image
+local palette = image:findPalette()
+
+-- applies a shader to the image
+image:process(shader)
+-- applied a shader to the image, creates new image with the result
+local newImage = image:map(shader,sx,sy)
+
+-- linearize all colors in the image using Color:linearize()
+image:linearize()
+-- linearize all colors in the image using Color:gamma2() function (faster than linearize)
+image:gamma2()
+```
+
 ### MediaParser
+```lua
+local MediaParser = require "MediaParser" -- require the class, path depends on your instalation and file path
+
+-- This is kind of like an abstract class, it doesn't have instances
+-- it is only used to create instances of ImageHandler
+
+--[[
+    USE
+]]
+-- Returns the image (imageHandler object) contained in the file at the given path
+local image = MediaParser:open(path)
+
+-- Returns the image (imageHandler object) contained in the file at the given path, parsed with the given format
+-- (you should probably always use open() )
+local image = MediaParser:parse(path,type)
+```
+
+
 ### Renderer
+```lua
+local Renderer = require "Renderer" -- require the class, path depends on your instalation and file path
+
+--[[
+    INSTANCIATION
+]]
+local renderer = Renderer:new({
+    term= term,     -- term to display to, and use for default size
+    combinators= {combinator1,combinator2}, -- combinators that can be used in the render
+    sx= 20,         -- size x
+    sy= 20,         -- size y
+    px= 0,          -- position x
+    py= 0,          -- position y
+    mask= mask      -- an ImageHandler of size (sx,sy), filled with the combinators give to the renderer
+})
+
+--[[
+    USE
+]]
+-- get the combinator to be used at (u,v)
+local usedCombinator = renderer:getCombinator(u,v)
+-- set what combinator to use at (u,v)
+renderer:setMaskAt(u,v,combinator)
+
+-- resize the renderer and it's mask
+renderer:resize(sx,sy)
+
+-- actual rendering of an image with a given palette
+local render = renderer:render(image,palette)
+
+-- show a render on screen
+renderer:display(render)
+-- or
+render:display()
+```
 
 
 ## Combinators
 
-### SimpleCombinator 
-### CharCombinator 
-### FastCharCombinator 
-### MathCharCombinator 
-### SquarePixelCombinator 
-### FlowCombinator 
-### VerboseCombinator 
-### ASCIICombinator 
+Here is a set of pre-made combinators included in ComBox right now.  
+More combinators may come in future updates.  
+
+**And don't forget you can make custom combinators yourself, or give us ideas for new ones.**  
+
+>More information, like parameters and details on the logic behind the render, can be found in each combinator file.
+
+- ### Demonstration
+    To demonstrate we will use the different combinators to display this cat :  
+    ![gatoOriginal.png](exempleImages/gatoOriginal.png)
+
+- ### SimpleCombinator 
+    The simplest way to display images on a CC term :
+    Using texels as rectangle "pixels" filled with a solid color. 
+    
+    "Pixels" being a solid color greatly limits color accuracy (because of the 16 color palette).
+
+    ![gatoSimpleRender.png](exempleImages/gatoSimpleRender.png)
+
+- ### SquarePixelCombinator 
+    Used to render images using square "pixels".
+    
+    Square pixels allow for higher resolution without any artefacts.
+    It is very fast, usefull for realtime use.
+
+    "Pixels" being a solid color still greatly limits color accuracy (because of the 16 color palette).
+
+    ![gatoSquareRender.png](exempleImages/gatoSquareRender.png)
+
+- ### CharCombinator 
+    Made to maximise color fidelity.
+    Uses a combination of text & background color mixed by a character to look closer to the desired color.
+    
+    This method sacrifies resolution and has a lot of visual noise, 
+    but achieves very nice colors in renders, especialy viewed from afar.
+    
+    There are multiple implementations of this idea (every combinator named with "Char").
+    This implementation allows you to choose the smoothness of the render, to reduce noise at the cost of losing color fidelity. 
+    But it is extremely slow because of state of the art Bruteforce™ technology.
+
+    ![gatoCharRender.png](exempleImages/gatoCharRender.png)
+
+- ### FastCharCombinator 
+    An implementation of the CharCombinator idea, focused entirely on speed.
+    
+    This version is consistenlty pretty smooth but less color accurate than others.
+    It also does not have as many customisation option as other Char combinators.
+
+    ![gatoFastCharRender.png](exempleImages/gatoFastCharRender.png)
+
+- ### MathCharCombinator 
+    An implementation of the CharCombinator idea, focused mainly on color accuracy.
+
+    This version is very color accurate but quite noisy upclose.
+    It is a more optimised version of CharCombinator but loses the adjustable smoothness option.
+
+    ![gatoMathCharRender.png](exempleImages/gatoMathCharRender.png)
+
+- ### FlowCombinator 
+    This is a combinator meant to follow the coutours of the image.
+    
+    It works by detecting high changes in color, finding the angle of that change
+    and assigning a corresponding character.
+
+    ![gatoFlowRender.png](exempleImages/gatoFlowRender.png)
+
+- ### VerboseCombinator 
+    This combinator will write text on screen depending on the desired color of the texel.
+    
+    It can be used to spell out colors where they appear or describe elements on the image.
+    It is not meant to create high fidelity renders of images, but it is very funny.
+
+    ![gatoVerboseRender.png](exempleImages/gatoVerboseRender.png)
+
+- ### ASCIICombinator 
+    This is a combinator meant to achieve a classic retro ascii look
+    
+    It works by using the lightness of the pixel as an index into a table of characters.
+
+    ![gatoAsciiRender.png](exempleImages/gatoAsciiRender.png)
 
 
 ## Credits & stuff
@@ -183,5 +424,63 @@ Project made by [hexell](https://github.com/hexelll/) (hexell_dev on Discord) an
 If you have questions, ideas, critisism, or need any help, come talk about it in the [Minecraft computer mods Discord](https://discord.gg/minecraft-computer-mods-477910221872824320).
 
 With inspiration from other CC:T renderers (pixelbox, bixelbox, ShrekBox).
+
+
+## Some cool renders 
+
+![exampleSunset.png](exempleImages/exampleSunset.png)
+**Pure gradient flex**
+> Made with MathCharCombinator
+---
+
+![exampleHat.png](exempleImages/exampleHat.png)
+**Steampunk my beloved**
+> Made with MathCharCombinator
+---
+
+![exampleKirby.png](exempleImages/exampleKirby.png)
+**Kirby, now with colorblind accessibility**
+> Made with VerboseCombinator
+---
+
+![exampleSpiral.png](exempleImages/exampleSpiral.png)
+**You are hypnoticaly compelled to star this repo**
+> Made with FlowCombinator and a shader
+---
+
+![exampleTree.png](exempleImages/exampleTree.png)
+**Who's that tree ? ~Pokemon music~**
+> Made with ASCIICombinator and FlowCombinator on the edges 
+---
+
+![exampleCloud.png](exempleImages/exampleCloud.png)
+**We live in the matrix, clouds are a simulation**
+> Made with MathCharCombinator and FlowCombinator on the edges 
+---
+
+![exampleClood.png](exempleImages/exampleClood.png)  
+**Just couldn't let this gorgeous clood not get some love**  
+> Made with MathCharCombinator and SquarePixelCombinator on the edges  
+---
+
+![lightshow1.gif](exempleImages/lightshow1.gif)   
+**You can also make things that move yay, shader adapted from [https://www.shadertoy.com/view/XsXXDn](https://www.shadertoy.com/view/XsXXDn)**  
+> Made with SquarePixelCombinator  
+---
+
+![lightshow2.gif](exempleImages/lightshow2.gif)   
+**You can also make things that move bis, shader adapted from [https://www.shadertoy.com/view/XsXXDn](https://www.shadertoy.com/view/mtyGWy)**  
+> Made with FastCharCombinator  
+---
+
+![plotter1.gif](exempleImages/plotter1.gif)  
+**This is an example from [Plotter](https://github.com/hexelll/ComboxPlotter), a small library for plotting points that depends on ComBox**  
+> Made with MathCharCombinator
+---  
+
+![exampleDjungelskog.png](exempleImages/exampleDjungelskog.png)
+**Djungelskog looking a bit fried today**
+> Made with ASCIICombinator, SquarePixelCombinator on the edges and a weird palette
+---
 
 

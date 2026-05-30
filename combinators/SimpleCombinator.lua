@@ -1,6 +1,11 @@
 --[[
 
-    
+    A fast combinator used for the simplest possible rendering logic :
+    Using texels as rectangle "pixels" filled with a solid color.
+
+    This is worse than SquarePixelCombinator in most situations,
+    as it has less resolution and isn't much faster.
+    It is mainly meant to be an understandable exemple of how combinators work.
 
     SimpleCombinator: {
         name: string,

@@ -115,11 +115,12 @@ function combinator:findCombination(u,v,image,palette)
     if self.invert then
         k = 1-k
     end
+    k = math.max(0,math.min(k,1))
     
     local c = 1
-    col[1] = math.min(px[1]*c,1)
-    col[2] = math.min(px[2]*c,1)
-    col[3] = math.min(px[3]*c,1)
+    col[1] = math.max(0,math.min(px[1]*c,1))
+    col[2] = math.max(0,math.min(px[2]*c,1))
+    col[3] = math.max(0,math.min(px[3]*c,1))
     
     local combination = {self.chars[1+round(k*(#chars-1))],hexTable[col:findClosest(palette)],hexTable[Color():findClosest(palette)]}
     if self.invert then
