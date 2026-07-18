@@ -21,4 +21,4 @@ return Pipeline
     :prior("entry")
     :defer("render")
     :defer("display")
-    :before("render","palette")
+    :before("render","generatePalette")
