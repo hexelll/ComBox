@@ -37,6 +37,11 @@ function Renderer:new(params)
     local o = {}
     o.term = params.term and params.term or term
     o.combinators = params.combinators and params.combinators or error("no combinators given")
+    for i,c in pairs(o.combinators) do
+        if type(c) == "string" then
+            o.combinators[i] = require("combinators."..c):new()
+        end
+    end
     local width,height = o.term.getSize()
     o.sx,o.sy = params.sx and params.sx or width, params.sy and params.sy or height
     o.mask = params.mask
@@ -188,8 +193,8 @@ function Renderer:render(image,palette)
     if self.debug then
         print("end render:",os.clock()-t)
     end
-    return {lines=lines,display=function()
-        self:display(lines)
+    return {lines=lines,palette=palette,display=function()
+        self:display(lines,palette)
         return self
     end}
 end
@@ -200,17 +205,18 @@ end
 
     display(
         self: Renderer,
-        lines: [ [char,char,char] ]
+        lines: [ [char,char,char] ],
+        palette?: [ Color ]
     ) -> Renderer
 
 ]]
-function Renderer:display(lines)
+function Renderer:display(lines,palette)
     local t
     if self.debug then
         t = os.clock()
         print("start display")
     end
-    local palette = self.palette
+    local palette = palette or self.palette
     for i=1,#palette do
         self.term.setPaletteColor(2^(i-1),palette[i][1],palette[i][2],palette[i][3])
     end
