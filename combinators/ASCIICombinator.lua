@@ -44,7 +44,8 @@ function combinator:new(args)
     local o = {
         cacheSize = args.cacheSize and args.cacheSize or 100,
         chars = args.chars and args.chars or chars,
-        invert = args.invert
+        invert = args.invert,
+        maxCol = Color(1,1,1)
     }
     setmetatable(o,{__index=self})
     return o
@@ -80,7 +81,7 @@ end
 
 ]]
 function combinator:onImageChange(image,palette,renderer)
-
+    self.maxCol = image:max()
 end
 
 local function round(x)
@@ -111,7 +112,7 @@ function combinator:findCombination(u,v,image,palette)
     if cacheCol then
         return cacheCol
     end
-    local k = (px[1]+px[2]+px[3])/3
+    local k = 1-math.min(math.sqrt(px:distance(self.maxCol))/math.sqrt(3),1)
     if self.invert then
         k = 1-k
     end

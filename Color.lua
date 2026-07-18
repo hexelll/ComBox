@@ -84,7 +84,7 @@ end
         g: ?number           | 0,    // green
         b: ?number           | 0,    // blue
         a: ?number           | 1,    // alpha
-	) -> Color
+	): Color
 ]]
 function Color:new(r,g,b,a)
     if type(r) == "string" then
@@ -143,6 +143,17 @@ function Color:new(r,g,b,a)
                 return Color:new(a[1]*b[1],a[2]*b[2],a[3]*b[3],a[4]*b[4])
             end
         end,
+        __div=function(a,b)
+            if type(a) == "number" and type(b) == "table" then
+                return Color:new(b/a[1],b/a[2],b/a[3],a[4])
+            end
+            if type(a) == "table" and type(b) == "number" then
+                return Color:new(a[1]/b,a[2]/b,a[3]/b,a[4])
+            end
+            if type(a) == "table" and type(b) == "table" then
+                return Color:new(a[1]/b[1],a[2]/b[2],a[3]/b[3],a[4]/b[4])
+            end
+        end,
 
         -- Equality : two colors are equal if : r1=r2 and g1=g2 and b1=b2
         __eq=function(a,b)
@@ -157,7 +168,7 @@ end
 
 	distance(
 		color: Color, // the other Color
-	) -> number
+	): number
 ]]
 function Color:distance(color)
     local s1,s2,s3,c1,c2,c3 = self[1],self[2],self[3],color[1],color[2],color[3]
@@ -176,7 +187,7 @@ end
         self: Color,
 		color: Color,
         k: number,    // coeficient for the mix
-	) -> Color
+	): Color
 ]]
 function Color:mix(color,k)
     return Color:new(interp(self[1],color[1],k),interp(self[2],color[2],k),interp(self[3],color[3],k),interp(self[4],color[4],k))
@@ -190,7 +201,7 @@ end
 		palette: [Color],           
         distanceFunction: ?function | Color.distance, // the function used to rank palette colors
         palettesize: ?number | #palette,              // can be given palettesize to reduce calls to #palette
-	) -> number
+	): number
 ]]
 function Color:findClosest(palette,distanceFunction,palettesize)
     palettesize = palettesize and palettesize or #palette
@@ -215,7 +226,7 @@ end
 
 	toOklab(
         self: Color
-    ) -> Color
+    ): Color
 ]]
 function Color:toOklab()
     local r, g, b = self[1],self[2],self[3]
@@ -251,7 +262,7 @@ end
 	distanceOklab(
         self: Color
 		color: Color,   // the other color         
-    ) -> number
+    ): number
 ]]
 function Color:distanceOklab(color)
     return self.distance(self:toOklab(),color:toOklab())
@@ -264,7 +275,7 @@ end
 
 	fromHex(
 		hex: String,
-	) -> Color
+	): Color
 ]]
 function Color.fromHex(hex)
     hex = string.lower(hex)
@@ -284,7 +295,7 @@ end
 
 	toHex(
         self: Color
-    ) -> String
+    ): String
 ]]
 function Color:toHex()
     local rgb = {round(self[1]*255),round(self[2]*255),round(self[3]*255)}
@@ -300,7 +311,7 @@ end
 
 	duplicate(
         self: Color
-    ) -> Color
+    ): Color
 ]]
 function Color:duplicate()
     return Color:new(table.unpack(self))
@@ -312,7 +323,7 @@ end
 
 	linearize(
         self: Color
-    ) -> Color
+    ): Color
 ]]
 function Color:linearize()
     local col = Color()
@@ -328,7 +339,7 @@ end
 
 	gamma2(
         self: Color
-    ) -> Color
+    ): Color
 ]]
 function Color:gamma2()
     return Color(self[1]^2.2,self[2]^2.2,self[3]^2.2)
@@ -343,13 +354,45 @@ end
 	toHash(
         self: Color
         size: number // To how many discrete values each component (r,g,b) of the Color is rounded to 
-    ) -> number
+    ): number
 ]]
 function Color:toHash(size)
     local r = math.floor(self[1]*(size-1)+0.5)
     local g = math.floor(self[2]*(size-1)+0.5)
     local b = math.floor(self[3]*(size-1)+0.5)
     return r*size*size+g*size+b
+end
+
+function Color:value()
+    local k = 0.30*self[1] + 0.59*self[2] + 0.11*self[3]
+    return k
+end
+
+function Color:gray()
+    local k = self:value()
+    return Color(k,k,k)
+end
+
+function Color:sum()
+    return self[1]+self[2]+self[3]
+end
+
+function Color:max()
+    return math.max(self[1],self[2],self[3])
+end
+
+function Color:invert()
+    return Color(1-self[1],1-self[2],1-self[3])
+end
+
+local function clamp(x,min,max)
+    min = min or 0
+    max = max or 1
+    return math.max(min,math.min(max,x))
+end
+
+function Color:clamp(min,max)
+    return Color(clamp(self[1],min,max),clamp(self[2],min,max),clamp(self[3],min,max))
 end
 
 -- Makes it so you can shorten Color:new() to just Color()

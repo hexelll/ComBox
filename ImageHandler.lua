@@ -48,7 +48,7 @@ end
         data:  ?[Color],      // Array of pixel Colors, 
                               // if nil : filled with transparent Black ( Color:new(0,0,0,0) )
         debug: ?bool | false         
-	) -> ImageHandler
+	): ImageHandler
     
 ]]
 function ImageHandler:new(sx,sy,data,debug)
@@ -255,7 +255,7 @@ end
     finds a palette using kmeans.
     for more information on how this works : https://www.kaggle.com/code/priyamchoksi/kmeanscolorization
 
-	findPalette(
+	findPaletteKmeans(
         self: ImageHandler
         distanceFunction: ?function | Color.distance  
         paletteSize:      ?number   | 16,
@@ -264,8 +264,7 @@ end
     ) -> [Color]
     
 ]]
-function ImageHandler:findPalette(distanceFunction,paletteSize,eps,maxIteration)
-    sleep()
+function ImageHandler:findPaletteKmeans(paletteSize,distanceFunction,eps,maxIteration)
     local t
     if self.debug then
         t = os.clock()
@@ -340,6 +339,76 @@ function ImageHandler:findPalette(distanceFunction,paletteSize,eps,maxIteration)
     return palette
 end
 
+local function argmax(X)
+    local imax = 1
+    local max = X[1]
+    for i,x in pairs(X) do
+        if x > max then
+            imax = i
+            max = x
+        end
+    end
+    return imax
+end
+
+function ImageHandler:findPaletteMedianCut(paletteSize,distanceFunction)
+    local lightness = 0
+    local function medianCut(points,key)
+        table.sort(points,function(a,b) return a[key] < b[key] end)
+        local l = #points
+        local mean = Color()
+        local n = 0
+        for i=1,#points/(2+lightness/paletteSize) do
+            local col = points[1]
+            mean = mean + col:clamp()
+            table.remove(points,1)
+            n=n+1
+        end
+        return mean/n
+    end
+    local function findRange(points,key)
+        local min = math.huge
+        local max = 0
+        for _,c in pairs(points) do
+            min = math.min(min,c[key])
+            max = math.max(max,c[key])
+        end
+        return max-min
+    end
+    self:findUniqueColors()
+    local points = {}
+    for _,p in pairs(self.uniqueColors) do
+        points[#points+1] = p
+        lightness = lightness+p:value()
+    end
+    lightness = lightness/#points
+    distanceFunction = distanceFunction and distanceFunction or Color.distance
+    paletteSize = paletteSize and paletteSize or 16
+    local palette = {}
+    for i=1,paletteSize do
+        local k = argmax{
+            findRange(points,1),
+            findRange(points,2),
+            findRange(points,3)
+        }
+        palette[#palette+1] = medianCut(points,k)
+        if #points == 0 then
+            break
+        end
+    end
+    return palette
+end
+
+function ImageHandler:findPalette(method,paletteSize,distanceFunction,eps,maxIteration)
+    method = method or "kmeans"
+    if method == "mediancut" then
+        return self:findPaletteMedianCut(paletteSize,distanceFunction)
+    elseif method == "kmeans" then
+        return self:findPaletteKmeans(paletteSize,distanceFunction,eps,maxIteration)
+    end
+    error("method needs to be either mediancut or kmeans")
+end
+
 --[[
 
 	Applies a shader to the image.
@@ -350,8 +419,8 @@ end
             self: ImageHandler, 
             u: number, 
             v: number
-        )-> Color
-    ) -> ImageHandler
+        ): Color
+    ): ImageHandler
     
 ]]
 function ImageHandler:process(shader)
@@ -387,7 +456,7 @@ end
         shader: function,
         sx: ?number | self.sx,
         sy: ?number | self.sy
-    ) -> ImageHandler
+    ): ImageHandler
 
 ]]
 function ImageHandler:map(shader,sx,sy)
@@ -407,6 +476,24 @@ function ImageHandler:map(shader,sx,sy)
         end
     end
     return newImg
+end
+
+function ImageHandler:value()
+    return self:map(function(s,u,v)
+        local k = s:getPx(u,v):value()
+        return Color(k,k,k)
+    end)
+end
+
+function ImageHandler:max()
+    local maxCol = Color()
+    local maxVal = 0
+    for _,col in pairs(self.data) do
+        local val = col:value()
+        maxCol = maxVal > val and maxCol or col
+        maxVal = math.max(maxVal,val)
+    end
+    return maxCol
 end
 
 --[[

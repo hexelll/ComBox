@@ -128,7 +128,7 @@ function combinator:findCombination(u,v,image,palette,renderer)
         for y=-1,1 do
             ku,kv = x/(renderer.sx-1),y/(renderer.sy-1)
             local px = image:getPx(u+ku,v+kv)
-            px = px and px or Color:new()
+            px = px and px or color
             local d = color:distance(px)
             vx = vx + x*d
             vy = vy + y*d
