@@ -17,7 +17,6 @@ function Pipeline:new(args)
         __index = function(_,k)
             return self[k] or function(s,alias) return s:pipe(k,alias) end
         end,
-
         __call = function(t,input)
             return t:start(input)
         end,
@@ -108,6 +107,17 @@ function Pipeline:remove(pipeAlias)
     return self
 end
 
+function Pipeline:disable(pipeAlias)
+    self:before("each",function(_,input,pipe)
+        if pipe[2] == pipeAlias then
+            pipe[1] = function(_,input) return input end
+            pipe[2] = "removed"
+        end
+        return input
+    end)
+    return self
+end
+
 function Pipeline:runPipe(pipe,input,pipeType)
     local output = input and input or {}
     local befores = self.befores[pipe[2]]
@@ -119,7 +129,7 @@ function Pipeline:runPipe(pipe,input,pipeType)
     local beforeEach = self.befores["each"]
     if beforeEach then
         for _,bepipe in pairs(beforeEach) do
-            output = bepipe[1](self,output,pipe[2],pipeType)
+            output = bepipe[1](self,output,pipe,pipeType)
         end
     end
 
@@ -128,7 +138,7 @@ function Pipeline:runPipe(pipe,input,pipeType)
     local afterEach = self.afters["each"]
     if afterEach then
         for _,aepipe in pairs(afterEach) do
-            output = aepipe[1](self,output,pipe[2],pipeType)
+            output = aepipe[1](self,output,pipe,pipeType)
         end
     end
     local afters = self.afters[pipe[2]]
@@ -170,7 +180,7 @@ local tstart
 
 function Pipeline:debug()
     self:before("each",function(_,input,pipe,pipeType)
-        print(pipeType.." :",pipe or 'pipe')
+        print(pipeType.." :",pipe[2] or 'pipe')
         tstart = os.clock()
         return input
     end)

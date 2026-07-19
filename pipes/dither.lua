@@ -50,6 +50,9 @@ end
 
 return function(_,input,alias)
     local dither = input[alias] or {}
+    if dither.disable then
+        return input
+    end
     input.image:process(function(self,u,v)
         local bayer = dither.bayer or 8
         local spread = dither.spread or 0.1

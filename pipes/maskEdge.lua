@@ -8,6 +8,9 @@ local Color = require "Color"
 
 return function(_,input,alias)
     local maskEdge = input[alias] or {}
+    if maskEdge.disable then
+        return input
+    end
     local edgeCoeff = maskEdge.edgeCoeff or 0.1
     input.screen.mask = input.image:map(function(self,u,v)
         local vec = {0,0}

@@ -24,9 +24,13 @@ return function(_,input)
     input.combinators = input.combinators or {input.combinator}
     input.screen = input.screen or Renderer:new{
         term=input.term,
-        combinators=input.combinators
+        combinators=input.combinators,
+        sx=input.screenx,
+        sy=input.screeny,
+        px=input.px,
+        py=input.py
     }
-    input.sx,input.sy = input.screen.sx, input.screen.sy
+    input.sx,input.sy = input.sx or input.screen.sx, input.sy or input.screen.sy
     local hasSquarePixel = false
     for _,c in pairs(input.combinators) do
         if c.name == "SquarePixelCombinator" then

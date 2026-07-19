@@ -1,5 +1,8 @@
 return function (_,input,alias)
     local blur = input[alias] or {}
+    if blur.disable then
+        return input
+    end
     local strength = blur.strength or 0.5
     input.image = input.image:map(function(self,u,v)
         local x,y = self:uvToXy(u,v)

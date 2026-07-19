@@ -6,7 +6,11 @@ package.path = package.path .. ";"..path.."?.lua" -- this is used so we can requ
 
 local ImageHandler = require "ImageHandler"
 
-return function(_,input)
+return function(_,input,alias)
+    local image = input[alias] or {}
+    if image.disable then
+        return input
+    end
     input.image = ImageHandler:new(input.sx,input.sy)
     return input
 end
