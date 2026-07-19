@@ -1,6 +1,6 @@
-return function (_,input)
-    input.blur = input.blur or {}
-    local strength = input.blur.strength or 0.5
+return function (_,input,alias)
+    local blur = input[alias] or {}
+    local strength = blur.strength or 0.5
     input.image = input.image:map(function(self,u,v)
         local x,y = self:uvToXy(u,v)
         local px = self:getPx(u,v)

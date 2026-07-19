@@ -48,11 +48,11 @@ local function clamp(x,min,max)
     return math.min(max,math.max(min,x))
 end
 
-return function(_,input)
-    input.dither = input.dither or {}
+return function(_,input,alias)
+    local dither = input[alias] or {}
     input.image:process(function(self,u,v)
-        local bayer = input.dither.bayer or 8
-        local spread = input.dither.spread or 0.1
+        local bayer = dither.bayer or 8
+        local spread = dither.spread or 0.1
         local sy = input.screen.sy
         if input.combinators[1].name == "SquarePixelCombinator" then
             sy = math.floor(0.5+sy*3/2)

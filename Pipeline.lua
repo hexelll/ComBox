@@ -111,16 +111,16 @@ function Pipeline:runPipe(pipe,input,pipeType)
     local beforeEach = self.befores["each"]
     if beforeEach then
         for _,bepipe in pairs(beforeEach) do
-            output = bepipe[1](self,output,pipe,pipeType)
+            output = bepipe[1](self,output,pipe[2],pipeType)
         end
     end
 
-    output = pipe[1](self,output,pipeType)
+    output = pipe[1](self,output,pipe[2],pipeType)
 
     local afterEach = self.afters["each"]
     if afterEach then
         for _,aepipe in pairs(afterEach) do
-            output = aepipe[1](self,output,pipe,pipeType)
+            output = aepipe[1](self,output,pipe[2],pipeType)
         end
     end
     local afters = self.afters[pipe[2]]
@@ -133,7 +133,7 @@ function Pipeline:runPipe(pipe,input,pipeType)
 end
 
 function Pipeline:start(input)
-    local output = input
+    local output = input or {}
     local beforeAll = self.befores["all"]
     if beforeAll then
         for _,pipe in pairs(beforeAll) do
@@ -162,7 +162,7 @@ local tstart
 
 function Pipeline:debug()
     self:before("each",function(_,input,pipe,pipeType)
-        print(pipeType.." :",pipe[2] or 'pipe')
+        print(pipeType.." :",pipe or 'pipe')
         tstart = os.clock()
         return input
     end)

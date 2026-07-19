@@ -14,6 +14,7 @@ pipeline
 --:process(function(self,u,v) return Color(u,v) end)
 --:process(function(self,u,v) return self:getPx(u,v):gray() end)
 :start{
+    blur={strength=0.5},
     generatePalette={method='kmeans',size=paletteSize},
     dither={spread=0.1,bayer=16},
     resize={method='naive'},

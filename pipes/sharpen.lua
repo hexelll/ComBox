@@ -2,9 +2,9 @@ package.path = package.path .. ";../?.lua" -- this is used so we can require fro
 
 local Color = require "Color"
 
-return function(_,input)
-    input.sharpen = input.sharpen or {}
-    local sharpness = input.sharpen.strength or 2
+return function(_,input,alias)
+    local sharpen = input[alias] or {}
+    local sharpness = sharpen.strength or 2
     input.image = input.image:map(function(self,u,v)
         local x,y = self:uvToXy(u,v)
         local px = self:getPx(u,v)

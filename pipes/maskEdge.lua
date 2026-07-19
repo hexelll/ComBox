@@ -6,8 +6,9 @@ package.path = package.path .. ";"..path.."?.lua" -- this is used so we can requ
 
 local Color = require "Color"
 
-return function(_,input)
-    input.edgeCoeff = input.edgeCoeff or 0.1
+return function(_,input,alias)
+    local maskEdge = input[alias] or {}
+    local edgeCoeff = maskEdge.edgeCoeff or 0.1
     input.screen.mask = input.image:map(function(self,u,v)
         local vec = {0,0}
         local color = self:getPx(u,v)
@@ -22,7 +23,7 @@ return function(_,input)
             end
         end
         local l = math.sqrt(vec[1]*vec[1]+vec[2]*vec[2])
-        if l > input.edgeCoeff then
+        if l > edgeCoeff then
             return input.screen.combinators[2]
         end
         return input.screen.combinators[1]
