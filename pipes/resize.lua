@@ -1,4 +1,4 @@
-return function(_,input,alias)
+return function(self,input,alias)
     if input.image then
         local resize = input[alias] or {}
         local method = resize.method or "mean"
@@ -6,6 +6,7 @@ return function(_,input,alias)
         local sy = resize.sx or input.sy
         if method == "mean" then
             input.image = input.image:resizeMean(sx,sy)
+            self:after(alias,"sharpen","resizeSharpen")
         elseif method == "naive" then
             input.image = input.image:resize(sx,sy)
         else

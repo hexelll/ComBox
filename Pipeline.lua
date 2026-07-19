@@ -15,8 +15,9 @@ function Pipeline:new(args)
     o.afters = o.afters or {}
     setmetatable(o,{
         __index = function(_,k)
-            return self[k]
+            return self[k] or function(s,alias) return s:pipe(k,alias) end
         end,
+
         __call = function(t,input)
             return t:start(input)
         end,
@@ -46,6 +47,13 @@ end
 -- pipe: (input: any): any
 function Pipeline:pipe(pipe,alias)
     self.pipes[#self.pipes+1] = self.makePipe(pipe,alias)
+    return self
+end
+
+function Pipeline:loop(n,pipe,alias)
+    for i=1,n do
+        self:pipe(pipe,alias)
+    end
     return self
 end
 
