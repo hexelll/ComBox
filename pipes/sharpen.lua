@@ -4,7 +4,10 @@ local Color = require "Color"
 
 return function(_,input,alias)
     local sharpen = input[alias] or {}
-    local sharpness = sharpen.strength or 0.5
+    if sharpen.disable then
+        return input
+    end
+    local sharpness = sharpen.strength or 0.75
     input.image = input.image:map(function(self,u,v)
         local x,y = self:uvToXy(u,v)
         local px = self:getPx(u,v)
