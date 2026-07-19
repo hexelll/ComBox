@@ -31,10 +31,22 @@ local function clamp(x)
     return math.min(math.max(x,0),1)
 end
 
+local function uvToXy(sx,sy,u,v)
+    return math.max(1,1+round(u*(sx-1))) , math.max(1,1+round(v*(sy-1)))
+end
+
+local function xyToIndex(sx,x,y)
+    return math.max(1,(y-1)*sx + x,1)
+end
+
 -- internal util to calculate indexes in data
 local function uvToIndex(sx,sy,u,v)
-    local x,y = round(u*(sx-1)) , round(v*(sy-1))
-    return y*sx + x + 1
+    local x,y = uvToXy(sx,sy,u,v)
+    return xyToIndex(sx,x,y)
+end
+
+function ImageHandler:uvToXy(u,v)
+    return uvToXy(self.sx,self.sy,u,v)
 end
 
 --[[
@@ -207,6 +219,11 @@ function ImageHandler:getPx(u,v)
     return self.data[index]
 end
 
+function ImageHandler:getPxXy(x,y)
+    local index = xyToIndex(self.sx,x,y)
+    return self.data[index]
+end
+
 --[[
 
 	Sets the Color at a specific point (u,v) of the image.
@@ -221,6 +238,13 @@ end
 ]]
 function ImageHandler:setPx(u,v,color)
     local index = uvToIndex(self.sx,self.sy,u,v)
+    self.data[index] = color
+    self.modified = true
+    return self
+end
+
+function ImageHandler:setPxXy(x,y,color)
+    local index = xyToIndex(self.sx,x,y)
     self.data[index] = color
     self.modified = true
     return self

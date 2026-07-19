@@ -36,12 +36,5 @@ return function(_,input)
     if input.path then
         input.image = MediaParser:open(input.path)
     end
-    if input.image then
-        if input.resizeMean then
-            input.image:resizeMean(input.sx,input.sy)
-        else
-            input.image:resize(input.sx,input.sy)
-        end
-    end
     return input
 end

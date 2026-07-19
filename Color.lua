@@ -158,6 +158,9 @@ function Color:new(r,g,b,a)
         -- Equality : two colors are equal if : r1=r2 and g1=g2 and b1=b2
         __eq=function(a,b)
             return a[1] == b[1] and a[2] == b[2] and a[3] == b[3]
+        end,
+        __unm=function(a)
+            return Color(-a[1],-a[2],-a[3])
         end
     })
     return o
