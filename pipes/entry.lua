@@ -1,11 +1,7 @@
-local fp = fs.open("/.combox_secrets","r")
-local path = fp.readAll()
-fp.close()
+if not import then error("use import to use this file not require") end
 
-package.path = package.path .. ";"..path.."?.lua" -- this is used so we can require from another directory
-
-local Renderer = require "Renderer"
-local MediaParser = require "MediaParser"
+local Renderer = import "../Renderer.lua"
+local MediaParser = import "../MediaParser.lua"
 
 --[[ 
     input: {
@@ -20,7 +16,7 @@ local MediaParser = require "MediaParser"
 ]]
 return function(_,input)
     input.resizeMean = input.resizeMean == nil and true or input.resizeMean
-    input.combinator = input.combinator or input.combinators and input.combinators[1] or require("combinators.FastCharCombinator"):new()
+    input.combinator = input.combinator or input.combinators and input.combinators[1] or import("../combinators/FastCharCombinator"):new()
     input.combinators = input.combinators or {input.combinator}
     input.screen = input.screen or Renderer:new{
         term=input.term,

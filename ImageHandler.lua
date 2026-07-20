@@ -13,12 +13,10 @@
     }
 
 ]]
-local fp = fs.open("/.combox_secrets","r")
-local path = fp.readAll()
-fp.close()
 
-package.path = package.path .. ";"..path.."?.lua" -- this is used so we can require from another directory
-local Color = require("Color")
+if not import then error("use import to use this file not require") end
+
+local Color = import "./Color.lua"
 
 local ImageHandler = {}
 

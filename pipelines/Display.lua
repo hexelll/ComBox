@@ -1,12 +1,8 @@
-local fp = fs.open("/.combox_secrets","r")
-local path = fp.readAll()
-fp.close()
+if not import then error("use import to use this file not require") end
 
-package.path = package.path .. ";"..path.."?.lua" -- this is used so we can require from another directory
-
-local Renderer = require "Renderer"
-local MediaParser = require "MediaParser"
-local Pipeline = require "Pipeline"
+local Renderer = import "../Renderer.lua"
+local MediaParser = import "../MediaParser.lua"
+local Pipeline = import "../Pipeline.lua"
 
 return Pipeline
     :new{

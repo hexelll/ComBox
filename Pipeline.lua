@@ -1,8 +1,4 @@
-local fp = fs.open("/.combox_secrets","r")
-local path = fp.readAll()
-fp.close()
-
-package.path = package.path .. ";"..path.."?.lua" -- this is used so we can require from another directory
+if not import then error("use import to use this file not require") end
 
 local Pipeline = {}
 
@@ -34,7 +30,7 @@ function Pipeline:new(args)
 end
 
 function Pipeline.makePipe(pipe,alias)
-    return type(pipe) == "string" and {require("pipes."..pipe),alias or pipe} or type(pipe) == "table" and {pipe[1],alias or pipe[2]} or {pipe,alias}
+    return type(pipe) == "string" and {import("./pipes/"..pipe..".lua"),alias or pipe} or type(pipe) == "table" and {pipe[1],alias or pipe[2]} or {pipe,alias}
 end
 
 -- pipe: (input: any): any

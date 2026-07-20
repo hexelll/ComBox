@@ -1,10 +1,6 @@
-local fp = fs.open("/.combox_secrets","r")
-local path = fp.readAll()
-fp.close()
+if not import then error("use import to use this file not require") end
 
-package.path = package.path .. ";"..path.."?.lua" -- this is used so we can require from another directory
-
-local Color = require "Color"
+local Color = import "../Color.lua"
 
 return function(_,input,alias)
     local maskEdge = input[alias] or {}

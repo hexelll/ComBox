@@ -1,6 +1,6 @@
-package.path = package.path .. ";../?.lua" -- this is used so we can require from a parent directory
+if not import then error("use import to use this file not require") end
 
-local Color = require "Color"
+local Color = import "../Color.lua"
 
 return function(_,input,alias)
     local sharpen = input[alias] or {}

@@ -1,12 +1,7 @@
+if not import then error("use import to use this file not require") end
 
-local fp = fs.open("/.combox_secrets","r")
-local path = fp.readAll()
-fp.close()
-
-package.path = package.path .. ";"..path.."?.lua" -- this is used so we can require from another directory
-
-local Color = require "Color"
-local ImageHandler = require "ImageHandler"
+local Color = import "./Color.lua"
+local ImageHandler = import "./ImageHandler.lua"
 
 local Renderer = {}
 
@@ -39,7 +34,7 @@ function Renderer:new(params)
     o.combinators = params.combinators and params.combinators or error("no combinators given")
     for i,c in pairs(o.combinators) do
         if type(c) == "string" then
-            o.combinators[i] = require("combinators."..c):new()
+            o.combinators[i] = import("./combinators/"..c..".lua"):new()
         end
     end
     local width,height = o.term.getSize()
