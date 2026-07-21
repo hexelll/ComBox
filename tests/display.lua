@@ -16,15 +16,19 @@ mon.clear()
 local sx,sy = mon.getSize()
 local scx,scy = sx*1,sy*1
 
-local image = MediaParser:open("../images/"..arg[1])
+local image = MediaParser:open("../images/"..arg[1]):resize(scx,scy*3/2)
+
+
+shell.setDir(dir)
 
 while true do
+    local k = (1+math.sin(os.clock()))/2
     pipeline
     :start{
         screenx=scx,
         screeny=scy,
-        sx=1+math.floor((scx-1)*(1+math.sin(os.clock()))/2),
-        sy=scy,
+        sx=2+(scx-1)*k,
+        sy=2+(scy-1)*k,
         px=(sx-scx)/2,
         py=(sy-scy)/2,
         resize={method='naive'},
@@ -34,4 +38,3 @@ while true do
     }
     sleep()
 end
-shell.setDir(dir)

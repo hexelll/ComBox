@@ -17,7 +17,7 @@ return Pipeline
     :prior("entry")
     :after("entry","resize")
     :after("resize","sharpen","resizeSharpen")
-    :before("render","dither","squarePixelDither")
+    :before("render","dither")
     :defer("render")
     :defer("display")
     :before("render","generatePalette")

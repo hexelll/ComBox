@@ -137,6 +137,8 @@ end
 ]]
 function ImageHandler:resize(newSx, newSy)
     local newData = {}
+    newSx = round(newSx)
+    newSy = round(newSy)
     for i=0,newSx-1 do
         for j=0,newSy-1 do
             local u,v = i/(newSx-1),j/(newSy-1)
