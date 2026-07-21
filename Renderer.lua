@@ -188,8 +188,15 @@ function Renderer:render(image,palette)
     if self.debug then
         print("end render:",os.clock()-t)
     end
-    return {lines=lines,palette=palette,display=function()
-        self:display(lines,palette)
+    return {
+        lines=lines,
+        palette=palette,
+        sx=self.sx,
+        sy=self.sy,
+        px=self.px,
+        py=self.py,
+        display=function()
+            self:display(lines,palette)
         return self
     end}
 end
