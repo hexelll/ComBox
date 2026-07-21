@@ -60,15 +60,20 @@ end
 PreCompiler.renderToLuaFile = function (content,filePath,contentType)
     contentType = contentType and contentType or "singleRender"
 
+    fs.delete(filePath)
+    sleep()
     local file = fs.open(filePath,"w")
+    sleep()
 
     if (contentType=="sequence") then
         file.write("-- Pre compiled render file from ComBox\n")
         file.write("local display="..displayFunction)
         file.write("\nreturn{\n")
-        for _,render in ipairs(content) do
+        for i,render in ipairs(content) do
+            print(i)
             file.write( serizalizeRender(render,true) )
             file.write(",\n")
+            sleep()
         end
         file.write("}")
     elseif (contentType=="album") then
@@ -79,11 +84,13 @@ PreCompiler.renderToLuaFile = function (content,filePath,contentType)
             file.write(key.."=")
             file.write( serizalizeRender(render,true) )
             file.write(",\n")
+            sleep()
         end
         file.write("}")
     else
         file.write("-- Pre compiled render file from ComBox\nreturn")
         file.write(serizalizeRender(content))
+        sleep()
     end
 
     file.close()
@@ -91,7 +98,7 @@ end
 
 -- 
 PreCompiler.renderToBinFile = function (content,filePath,contentType)
-    contentType = contentType and contentType or "single"
+    contentType = contentType and contentType or "singleRender"
     -- TODO
 end
 
