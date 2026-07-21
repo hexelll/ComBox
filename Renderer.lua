@@ -3,6 +3,11 @@ if not import then error("use import to use this file not require") end
 local Color = import "./Color.lua"
 local ImageHandler = import "./ImageHandler.lua"
 
+local function round(x)
+    return math.floor(x+0.4999)
+end
+
+
 local Renderer = {}
 
 --[[
@@ -39,7 +44,7 @@ function Renderer:new(params)
     end
     local width,height = o.term.getSize()
     o.sx,o.sy = params.sx and params.sx or width, params.sy and params.sy or height
-    o.sx,o.sy = round(o.sx,o.sy)
+    o.sx,o.sy = round(o.sx),round(o.sy)
     o.mask = params.mask
     o.px,o.py = params.px and params.px or 0, params.py and params.py or 0
     o.debug = params.debug
