@@ -112,7 +112,7 @@ end
 ]]
 function combinator:findCombination(u,v,image,palette,renderer)
     local step = 1/(renderer.sy-1)
-    local c = image:getPx(u,v)
+    local c = image:getPx(u,v) or Color()
 
     local combination = {}
 

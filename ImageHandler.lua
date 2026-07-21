@@ -267,7 +267,7 @@ function ImageHandler:findUniqueColors(interval)
     self.uniqueColors = {}
     for u=0,1,interval do
         for v=0,1,interval do
-            local color = self:getPx(u,v)
+            local color = self:getPx(u,v) or Color()
             self.uniqueColors[color:toHex()] = color
         end
     end
