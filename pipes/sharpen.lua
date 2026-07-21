@@ -7,7 +7,7 @@ return function(_,input,alias)
     if sharpen.disable then
         return input
     end
-    local sharpness = sharpen.strength or 0.75
+    local sharpness = sharpen.strength or 0.5
     input.image = input.image:map(function(self,u,v)
         local x,y = self:uvToXy(u,v)
         local px = self:getPx(u,v)

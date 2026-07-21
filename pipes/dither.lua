@@ -60,10 +60,10 @@ return function(_,input,alias)
         if input.combinators[1].name == "SquarePixelCombinator" then
             sy = math.floor(0.5+sy*3/2)
         end
-        local x,y = self:uvToXy(u,v)
+        local x,y = math.floor(0.5+u*(input.sx-1)),math.floor(0.5+v*(sy-1))
         local bayerMat = bayerMatrices[bayer]
-        local xn = (x-1) % bayer
-        local yn = (y-1) % bayer
+        local xn = x % bayer
+        local yn = y % bayer
         local M = bayerMat[1+xn][1+yn]/(bayer*bayer)
         local px = self:getPx(u,v)
         return (px + clamp(spread * (M-0.5),-1,1)):clamp()

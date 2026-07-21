@@ -34,7 +34,7 @@ local function uvToXy(sx,sy,u,v)
 end
 
 local function xyToIndex(sx,x,y)
-    return math.max(1,(y-1)*sx + x,1)
+    return math.max(1,(round(y)-1)*sx + round(x),1)
 end
 
 -- internal util to calculate indexes in data
