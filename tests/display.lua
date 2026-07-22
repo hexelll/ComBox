@@ -21,17 +21,20 @@ local image = MediaParser:open("../images/"..arg[1]):resize(scx,scy*3/2)
 
 shell.setDir(dir)
 
+pipeline
+    :debug()
+
 while true do
     local k = (1+math.sin(os.clock()))/2
-    pipeline
-    :start{
+    pipeline:start{
+        resizeSharpen={strength=k*10},
         screenx=scx,
         screeny=scy,
-        sx=2+(scx-1)*k,
-        sy=2+(scy-1)*k,
+        sx=scx,
+        sy=scy,
         px=(sx-scx)/2,
         py=(sy-scy)/2,
-        resize={method='naive'},
+        resize={method='mean'},
         image=image,
         term=mon,
         combinator="SquarePixelCombinator"
