@@ -21,7 +21,7 @@
 
 if not import then error("use import to use this file not require") end
 
-local deflate = import("outsideLibs/deflate.lua")
+local deflate = import("./deflate.lua")
 local requiredDeflateVersion = "0.3.20111128"
 
 if (deflate._VERSION ~= requiredDeflateVersion) then
