@@ -22,12 +22,17 @@ local image = MediaParser:open("../images/"..arg[1]):resize(scx,scy*3/2)
 shell.setDir(dir)
 
 pipeline
-    :debug()
+    --:debug()
+    :pipe(function(_,input)
+        input.image:process(function(self,u,v)
+            return self:getPx(u,v)*input.k
+        end)
+        return input
+    end)
 
 while true do
-    local k = (1+math.sin(os.clock()))/2
     pipeline:start{
-        resizeSharpen={strength=k*10},
+        k=(1+math.sin(os.clock()))/2,
         screenx=scx,
         screeny=scy,
         sx=scx,

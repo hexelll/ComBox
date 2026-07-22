@@ -16,7 +16,6 @@ return Pipeline
     }
     :prior("entry")
     :after("entry","resize")
-    :after("resize","sharpen","resizeSharpen")
     :before("render","dither")
     :defer("render")
     :defer("display")
