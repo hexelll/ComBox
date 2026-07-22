@@ -14,7 +14,7 @@
 
 ]]
 
-local Color = require("Color")
+local Color = import "../Color.lua"
 
 local combinator = {name="VerboseCombinator"}
 

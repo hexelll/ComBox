@@ -15,7 +15,7 @@
 ]]
 
 
-local Color = require "Color"
+local Color = import "../Color.lua"
 
 local patterns = {
     {0,'|'},

@@ -1,4 +1,4 @@
-local Color = require("Color")
+local Color = import "../Color.lua"
 
 local RoughCharCombinator = {name="RoughCharCombinator"}
 
