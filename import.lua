@@ -40,11 +40,13 @@ local function _import(path,dir,cache)
     cache = cache or {}
     dir = dir or shell.getRunningProgram()
     local absolutePath,isRemote = combine(dir,path)
-    local content = cache[absolutePath]
-    if not content then
-        content = getContent(absolutePath,isRemote)
-        cache[absolutePath] = content
+    local out = cache[absolutePath]
+    if out then
+        print(path,out)
+        return out
     end
+    local content = getContent(absolutePath,isRemote)
+    cache[absolutePath] = content
     local import = _import
     local fenv = _ENV
     local env = setmetatable({
@@ -52,7 +54,8 @@ local function _import(path,dir,cache)
             return _import(path,_dir or absolutePath,_cache or cache)
         end
     },{__index=fenv})
-    return load(content,"@/"..path,nil,env)()
+    cache[absolutePath] = load(content,"@/"..path,nil,env)()
+    return cache[absolutePath]
 end
 
 return _import
