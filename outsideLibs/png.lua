@@ -19,7 +19,9 @@
 -- IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 -- CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-local deflate = require("outsideLibs.deflate")
+if not import then error("use import to use this file not require") end
+
+local deflate = import("outsideLibs.deflate.lua")
 local requiredDeflateVersion = "0.3.20111128"
 
 if (deflate._VERSION ~= requiredDeflateVersion) then

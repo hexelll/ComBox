@@ -42,7 +42,6 @@ local function _import(path,dir,cache)
     local absolutePath,isRemote = combine(dir,path)
     local out = cache[absolutePath]
     if out then
-        print(path,out)
         return out
     end
     local content = getContent(absolutePath,isRemote)
