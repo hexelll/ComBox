@@ -19,11 +19,11 @@ local function combine(dir,path,downloadDir)
     dir = toRemote(dir)
     if type(dir) == "table" then
         return 
-            dir[1]..fs.combine(dir[2]:sub(#dir[2],#dir[2]) ~= '/' and fs.getDir(dir[2]) or dir[2],path),
+            dir[1]..fs.combine(toDir(dir[2]),path),
             true,
             downloadDir and fs.combine(downloadDir,path)
     end
-    return fs.combine(fs.getDir(dir),path),false
+    return fs.combine(toDir(dir),path),false
 end
 
 local function getContent(path,isRemote,downloadPath)
@@ -56,14 +56,21 @@ local function getContent(path,isRemote,downloadPath)
     return content
 end
 
+
+local function sanitizeDir(dir)
+    dir = dir:sub(#dir,#dir) ~= '/' and dir..'/' or dir
+    dir = dir:sub(1,1) ~= '/' and '/'..dir or dir
+    return dir
+end
+
 local import = {}
 
 function import:new(args)
     args = args or {}
     local o = {}
     o.cache = args.cache or {}
-    o.dir = args.dir or shell.getRunningProgram()
-    o.downloadDir = args.downloadDir
+    o.dir = args.dir or sanitizeDir('/'..fs.getDir(shell.getRunningProgram()))
+    o.downloadDir = args.downloadDir and sanitizeDir(args.downloadDir)
     setmetatable(o,{
         __call=function(_,...)
             return o:import(...)
@@ -75,14 +82,21 @@ function import:new(args)
     return o
 end
 
+
 -- dir can be an url
 function import:setDir(dir)
-    self.dir = dir
+    if dir:find("http") ~= nil then
+        self.dir = dir
+        return self
+    end
+    self.dir = dir:sub(1,1) == '/' and dir or fs.combine(self.dir,dir)
+    self.dir = sanitizeDir(self.dir)
     return self
 end
 
 function import:setDownloadDir(dir)
-    self.downloadDir = dir
+    self.downloadDir = dir:sub(1,1) == '/' and dir or fs.combine(self.dir,dir)
+    self.downloadDir = sanitizeDir(self.downloadDir)
     return self
 end
 
@@ -93,7 +107,7 @@ end
 
 function import:import(path,dir,cache,downloadDir)
     cache = cache or self.cache
-    dir = dir or self.dir
+    dir = path:sub(1,1) == '/' and '/' or dir and dir or self.dir
     downloadDir = downloadDir or self.downloadDir
     local absolutePath,isRemote,downloadPath = combine(dir,path,downloadDir)
     local out = cache[absolutePath]
@@ -103,7 +117,7 @@ function import:import(path,dir,cache,downloadDir)
     local content = getContent(absolutePath,isRemote,downloadPath)
     cache[absolutePath] = content
     local env = setmetatable({
-        import=import:new{dir=absolutePath,downloadDir=fs.getDir(downloadPath),cache=cache}
+        import=import:new{dir=absolutePath,downloadDir=downloadPath and toDir(downloadPath),cache=cache}
     },{__index=_ENV})
     cache[absolutePath] = load(content,"@/"..path,nil,env)()
     return cache[absolutePath]
