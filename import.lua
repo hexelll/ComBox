@@ -113,7 +113,6 @@ function import:import(path,dir,cache,downloadDir)
         return out
     end
     local content = getContent(absolutePath,isRemote,downloadPath)
-    cache[absolutePath] = content
     local env = setmetatable({
         import=import:new{dir=absolutePath,downloadDir=downloadPath and toDir(downloadPath),cache=cache}
     },{__index=_ENV})
