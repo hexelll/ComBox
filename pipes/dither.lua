@@ -60,7 +60,7 @@ return function(_,input,alias)
         if input.combinators[1].name == "SquarePixelCombinator" then
             sy = math.floor(0.5+sy*3/2)
         end
-        local x,y = math.floor(0.5+u*(input.sx-1)),math.floor(0.5+v*(sy-1))
+        local x,y = math.floor(0.5+u*(input.screen.sx-1)),math.floor(0.5+v*(sy-1))
         local bayerMat = bayerMatrices[bayer]
         local xn = x % bayer
         local yn = y % bayer
