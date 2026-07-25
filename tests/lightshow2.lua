@@ -1,8 +1,11 @@
 package.path = package.path .. ";../?.lua" -- this is used so we can require from a parent directory
+local import = require 'import'
 
-local Color = require "Color"
-local Renderer = require "Renderer"
-local ImageHandler = require "ImageHandler"
+import:setDir('../')
+
+local Color = import "Color.lua"
+local Renderer = import "Renderer.lua"
+local ImageHandler = import "ImageHandler.lua"
 
 if not arg[1] then
     error("the first argument should be the name of a combinator, ex: FastCharCombinator")
@@ -56,7 +59,7 @@ while true do
         local c = Color();
         local l0 = length(u0,v0)
         local k = math.exp(-l0)
-        for i=0,0 do
+        for i=0,2 do
             u=fract(u*1.5)-0.5
             v=fract(v*1.5)-0.5
             local d = length(u,v)*k
