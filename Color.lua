@@ -302,9 +302,11 @@ end
 ]]
 function Color:toHex()
     local rgb = {round(self[1]*255),round(self[2]*255),round(self[3]*255)}
-    local hex = hexTable[(rgb[1] % 16)+1]..hexTable[(round((rgb[1]-(rgb[1] % 16))/16)%16)+1]..
-        hexTable[(rgb[2] % 16)+1]..hexTable[(round((rgb[2]-(rgb[2] % 16))/16)%16)+1]..
-        hexTable[(rgb[3] % 16)+1]..hexTable[(round((rgb[3]-(rgb[3] % 16))/16)%16)+1]
+    local hex = table.concat{
+        hexTable[(rgb[1] % 16)+1],hexTable[(round((rgb[1]-(rgb[1] % 16))/16)%16)+1],
+        hexTable[(rgb[2] % 16)+1],hexTable[(round((rgb[2]-(rgb[2] % 16))/16)%16)+1],
+        hexTable[(rgb[3] % 16)+1],hexTable[(round((rgb[3]-(rgb[3] % 16))/16)%16)+1]
+    }
     return hex
 end
 
