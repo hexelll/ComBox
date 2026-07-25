@@ -43,7 +43,7 @@ local function serializeRender(render,referenceDisplay)
         ",\nsx=",render.sx,
         ",\nsy=",render.sy,
         ",\npx=",render.px,
-        ",\npy="render.py,
+        ",\npy=",render.py,
         ",lines=",serialisedLines,
         ",\ndisplay=",display,
         "\n}"
