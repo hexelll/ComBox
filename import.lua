@@ -117,7 +117,7 @@ function import:import(path,dir,cache,downloadDir)
     local env = setmetatable({
         import=import:new{dir=absolutePath,downloadDir=downloadPath and toDir(downloadPath),cache=cache}
     },{__index=_ENV})
-    cache[absolutePath] = load(content,"@/"..path,nil,env)()
+    cache[absolutePath] = load(content,"@/"..absolutePath,nil,env)()
     return cache[absolutePath]
 end
 
