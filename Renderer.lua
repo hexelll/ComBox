@@ -167,7 +167,7 @@ function Renderer:render(image,palette)
     local timeYield = os.clock()
     local lines = {}
     for i=1,self.sy do
-        lines[i] = {"","",""}
+        lines[i] = {{},{},{}}
         for j=1,self.sx do
             if ( os.clock() > timeYield+5 ) then
                 sleep()
@@ -186,10 +186,13 @@ function Renderer:render(image,palette)
             if not combination[1] or not combination[2] or not combination[2] then
                 error("error in combination at uv ("..u..","..v..") with "..combinator.name.." combination [1]:"..combination[1].." [2]:"..combination[2].." [3]:"..combination[3])
             end
-            lines[i][1] = lines[i][1]..combination[1]
-            lines[i][2] = lines[i][2]..combination[2]
-            lines[i][3] = lines[i][3]..combination[3]
+            lines[i][1][j] = combination[1]
+            lines[i][2][j] = combination[2]
+            lines[i][3][j] = combination[3]
         end
+        lines[i][1] = table.concat(lines[i][1])
+        lines[i][2] = table.concat(lines[i][2])
+        lines[i][3] = table.concat(lines[i][3])
     end
     if self.debug then
         print("end render:",os.clock()-t)
