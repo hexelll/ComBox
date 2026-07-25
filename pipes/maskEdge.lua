@@ -26,6 +26,6 @@ return function(_,input,alias)
             return input.screen.combinators[2]
         end
         return input.screen.combinators[1]
-    end,input.sx,input.sy)
+    end)
     return input
 end

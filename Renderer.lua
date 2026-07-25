@@ -49,13 +49,7 @@ function Renderer:new(params)
     o.px,o.py = params.px and params.px or 0, params.py and params.py or 0
     o.debug = params.debug
     if not o.mask then
-        o.mask = ImageHandler:new(o.sx,o.sy,nil,true)
-        for i=0,o.sx-1 do
-            for j=0,o.sy-1 do
-                local u,v = i/(o.sx-1),j/(o.sy-1)
-                o.mask:setPx(u,v,o.combinators[1])
-            end
-        end
+        o.mask = ImageHandler:new(o.sx,o.sy,o.combinators[1])
     end
     setmetatable(o,{
         __index=function(_,k)
@@ -112,7 +106,13 @@ end
 
 ]]
 function Renderer:getCombinator(u,v)
-    return self.mask:getPx(u,v)
+    local c = self.mask:getPx(u,v)
+    if type(c) == 'number' then
+        return self.combinators[c]
+    elseif type(c) == 'table' then
+        return c
+    end
+    error('not a combinator at '..u..' '..v)
 end
 
 --[[

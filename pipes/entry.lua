@@ -26,6 +26,7 @@ return function(_,input)
         px=input.px,
         py=input.py
     }
+    input.masks = input.masks or {}
     input.combinators = input.screen.combinators
     input.sx,input.sy = input.sx or input.screen.sx, input.sy or input.screen.sy
     local hasSquarePixel = false

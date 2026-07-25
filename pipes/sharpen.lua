@@ -16,6 +16,6 @@ return function(_,input,alias)
         local p3 = (self:getPxXy(x,y-1) or px)
         local p4 = (self:getPxXy(x,y+1) or px)
         return (px + (px-(p1+p2+p3+p4)/4) * sharpness):clamp()
-    end)
+    end,input.masks[sharpen.mask])
     return input
 end

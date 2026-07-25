@@ -54,8 +54,8 @@ return function(_,input,alias)
         return input
     end
     input.image:process(function(self,u,v)
-        local bayer = dither.bayer or 8
-        local spread = dither.spread or 0.1
+        local bayer = dither.bayer or 16
+        local spread = dither.spread or 0.05
         local sy = input.screen.sy
         if input.combinators[1].name == "SquarePixelCombinator" then
             sy = math.floor(0.5+sy*3/2)
@@ -67,6 +67,6 @@ return function(_,input,alias)
         local M = bayerMat[1+xn][1+yn]/(bayer*bayer)
         local px = self:getPx(u,v)
         return (px + clamp(spread * (M-0.5),-1,1)):clamp()
-    end)
+    end,input.masks[dither.mask])
     return input
 end

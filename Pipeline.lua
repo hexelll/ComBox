@@ -11,7 +11,7 @@ function Pipeline:new(args)
     o.afters = o.afters or {}
     setmetatable(o,{
         __index = function(_,k)
-            return self[k] or function(s,alias) return s:pipe(k,alias) end
+            return self[k] or function(s,alias,default) return s:pipe(k,alias,default) end
         end,
         __call = function(t,input)
             return t:start(input)
@@ -29,44 +29,48 @@ function Pipeline:new(args)
     return o
 end
 
-function Pipeline.makePipe(pipe,alias)
-    return type(pipe) == "string" and {import("./pipes/"..pipe..".lua"),alias or pipe} or type(pipe) == "table" and {pipe[1],alias or pipe[2]} or {pipe,alias}
+function Pipeline.makePipe(pipe,alias,default)
+    default = type(alias) == 'table' and alias or default
+    default = default or {}
+    return type(pipe) == "string" and {import("./pipes/"..pipe..".lua"),alias or pipe,default} 
+    or type(pipe) == "table" and {pipe[1],alias or pipe[2],default} 
+    or {pipe,alias,default}
 end
 
 -- pipe: (input: any): any
-function Pipeline:prior(pipe,alias)
-    self.prioritized[#self.prioritized+1] = self.makePipe(pipe,alias)
+function Pipeline:prior(pipe,alias,default)
+    self.prioritized[#self.prioritized+1] = self.makePipe(pipe,alias,default)
     return self
 end
 
 -- pipe: (input: any): any
-function Pipeline:pipe(pipe,alias)
-    self.pipes[#self.pipes+1] = self.makePipe(pipe,alias)
+function Pipeline:pipe(pipe,alias,default)
+    self.pipes[#self.pipes+1] = self.makePipe(pipe,alias,default)
     return self
 end
 
-function Pipeline:loop(n,pipe,alias)
+function Pipeline:loop(n,pipe,alias,default)
     for i=1,n do
-        self:pipe(pipe,alias)
+        self:pipe(pipe,alias,default)
     end
     return self
 end
 
 -- pipe: (input: any): any
-function Pipeline:defer(pipe,alias)
-    self.defered[#self.defered+1] = self.makePipe(pipe,alias)
+function Pipeline:defer(pipe,alias,default)
+    self.defered[#self.defered+1] = self.makePipe(pipe,alias,default)
     return self
 end
 
-function Pipeline:before(pipeAlias,pipe,alias)
+function Pipeline:before(pipeAlias,pipe,alias,default)
     self.befores[pipeAlias] = self.befores[pipeAlias] or {}
-    table.insert(self.befores[pipeAlias],self.makePipe(pipe,alias))
+    table.insert(self.befores[pipeAlias],self.makePipe(pipe,default,alias))
     return self
 end
 
-function Pipeline:after(pipeAlias,pipe,alias)
+function Pipeline:after(pipeAlias,pipe,alias,default)
     self.afters[pipeAlias] = self.afters[pipeAlias] or {}
-    table.insert(self.afters[pipeAlias],self.makePipe(pipe,alias))
+    table.insert(self.afters[pipeAlias],self.makePipe(pipe,default,alias))
     return self
 end
 
@@ -129,6 +133,15 @@ function Pipeline:runPipe(pipe,input,pipeType)
         end
     end
 
+    if pipe[2] then
+        output[pipe[2]] = output[pipe[2]] or {}
+        local o = output[pipe[2]]
+        for k,v in pairs(pipe[3]) do
+            if not o[k] then
+                o[k] = v
+            end
+        end
+    end
     output = pipe[1](self,output,pipe[2],pipeType)
 
     local afterEach = self.afters["each"]

@@ -5,6 +5,6 @@ return function(_,input,alias)
     end
     input.image:process(function(self,u,v)
         return self:getPx(u,v):invert()
-    end)
+    end,input.masks[invert.mask])
     return input
 end

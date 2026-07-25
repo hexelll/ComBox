@@ -4,16 +4,7 @@ local Renderer = import "../Renderer.lua"
 local MediaParser = import "../MediaParser.lua"
 local Pipeline = import "../Pipeline.lua"
 
-return Pipeline
-    :new{
-        process = function(self,shader)
-            self:pipe(function(s,input)
-                input.image:process(shader)
-                return input
-            end)
-            return self
-        end
-    }
+return Pipeline:new()
     :prior("entry")
     :after("entry","resize")
     :defer("render")

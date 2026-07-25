@@ -61,17 +61,16 @@ end
 	): ImageHandler
     
 ]]
-function ImageHandler:new(sx,sy,data,debug)
-
+function ImageHandler:new(sx,sy,default,data,debug)
     local sx,sy = math.max(sx,0),math.max(sy,0)
 
-    if (not data) then
+    if not data then
         data = {}
         for i=1,sx*sy do
-            data[i] = Color:new(0,0,0,0)
+            data[i] = default or Color()
         end
     end
-
+    
     local o = {sx=sx,sy=sy,data=data,debug=debug,modified=true}
 
     setmetatable(o,{
@@ -81,25 +80,6 @@ function ImageHandler:new(sx,sy,data,debug)
     })
 
     return o
-end
-
---[[
-
-	Copies the image by reference
-
-	copy(
-        self: ImageHandler
-    ) -> ImageHandler
-
-]]
-function ImageHandler:copy()
-    local newData = {}
-    for i=1,self.sx*self.sy do
-        newData[i] = self.data[i]
-    end
-
-    local img = ImageHandler:new(self.sx,self.sy,newData)
-    return img
 end
 
 --[[
@@ -119,7 +99,7 @@ function ImageHandler:duplicate()
         newData[i] = self.data[i]:duplicate()
     end
 
-    local img = ImageHandler:new(self.sx,self.sy,newData)
+    local img = ImageHandler:new(self.sx,self.sy,nil,newData)
     return img
 end
 
@@ -451,7 +431,7 @@ end
     ): ImageHandler
     
 ]]
-function ImageHandler:process(shader)
+function ImageHandler:process(shader,mask)
     local t
     if self.debug then
         t = os.clock()
@@ -465,8 +445,10 @@ function ImageHandler:process(shader)
                 timeYield = os.clock()
             end
             local u,v = i/(self.sx-1),j/(self.sy-1)
-            local color = shader(self,u,v)
-            self:setPx(u,v,color)
+            if not mask or mask:getPx(u,v) then
+                local color = shader(self,u,v)
+                self:setPx(u,v,color)
+            end
         end
     end
     if self.debug then
@@ -487,7 +469,7 @@ end
     ): ImageHandler
 
 ]]
-function ImageHandler:map(shader,sx,sy)
+function ImageHandler:map(shader,mask,sx,sy)
     sx = sx and sx or self.sx
     sy = sy and sy or self.sy
     local newImg = ImageHandler:new(sx,sy)
@@ -499,7 +481,12 @@ function ImageHandler:map(shader,sx,sy)
                 timeYield = os.clock()
             end
             local u,v = i/(sx-1),j/(sy-1)
-            local color = shader(self,u,v)
+            local color
+            if not mask or mask:getPx(u,v) then
+                color = shader(self,u,v)
+            else
+                color = self:getPx(u,v)
+            end
             newImg:setPx(u,v,color)
         end
     end

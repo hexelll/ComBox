@@ -85,7 +85,7 @@ function MediaParser:parse(path,type)
         local p = pixels[i]
         imageData[i] = Color:new(p[1]/255,p[2]/255,p[3]/255,p[4]/255)
     end
-    return ImageHandler:new(desc.width,desc.height,imageData)
+    return ImageHandler:new(desc.width,desc.height,nil,imageData)
 end
 
 --[[
