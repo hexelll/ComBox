@@ -11,7 +11,7 @@ if not arg[1] then
     error("the first argument should be the name of a combinator, ex: FastCharCombinator")
 end
 
-local combinator = require ("combinators."..arg[1]):new()
+local combinator = import ("combinators/"..arg[1]..'.lua'):new()
 
 local mon = peripheral.find("monitor")
 if mon then
