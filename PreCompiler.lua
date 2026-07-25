@@ -32,7 +32,7 @@ local displayFunction = [[function(self,term)
     return self
 end]]
 
-local function serizalizeRender(render,referenceDisplay)
+local function serializeRender(render,referenceDisplay)
     local serialisedPalette = textutils.serialize( render.palette , {compact=true})
     local serialisedLines = serializeLines( render.lines )
 
@@ -54,39 +54,36 @@ end
 
 -- 
 PreCompiler.renderToLuaFile = function (content,filePath,contentType)
-    contentType = contentType and contentType or "singleRender"
-
     fs.delete(filePath)
-    sleep()
     local file = fs.open(filePath,"w")
-    sleep()
 
     if (contentType=="sequence") then
         file.write("-- Pre compiled render file from ComBox\n")
-        file.write("local display="..displayFunction)
+        file.write("local display=")
+        file.write(displayFunction)
         file.write("\nreturn{\n")
-        for i,render in ipairs(content) do
-            print(i)
-            file.write( serizalizeRender(render,true) )
+        for _,render in ipairs(content) do
+            file.write( serializeRender(render,true) )
             file.write(",\n")
             sleep()
         end
         file.write("}")
     elseif (contentType=="album") then
         file.write("-- Pre compiled render file from ComBox\n")
-        file.write("local display="..displayFunction)
+        file.write("local display=")
+        file.write(displayFunction)
         file.write("\nreturn{\n")
         for key,render in pairs(content) do
-            file.write(key.."=")
-            file.write( serizalizeRender(render,true) )
+            file.write(key)
+            file.write("=")
+            file.write( serializeRender(render,true) )
             file.write(",\n")
             sleep()
         end
         file.write("}")
     else
         file.write("-- Pre compiled render file from ComBox\nreturn")
-        file.write(serizalizeRender(content))
-        sleep()
+        file.write(serializeRender(content))
     end
 
     file.close()
@@ -94,8 +91,18 @@ end
 
 -- 
 PreCompiler.renderToBinFile = function (content,filePath,contentType)
-    contentType = contentType and contentType or "singleRender"
-    -- TODO
+    fs.delete(filePath)
+    local file = fs.open(filePath,"wb")
+    
+    if (contentType=="sequence") then  
+        print() 
+    elseif (contentType=="album") then
+        print()
+    else
+        file.write(40)
+    end
+
+    file.close()
 end
 
 -- 
@@ -104,8 +111,8 @@ PreCompiler.getRenderFromFile = function (filePath)
         return require(filePath)
     else
         
+        print()
         -- TODO : read file
-        
     end
 end
 
