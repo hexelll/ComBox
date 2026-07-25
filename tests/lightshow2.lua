@@ -18,11 +18,6 @@ if mon then
     mon.setTextScale(0.5)
 end
 
-local screen = Renderer:new{
-    term=mon,
-    combinators = { combinator }
-}
-
 local function length(x,y)
     return math.sqrt(x*x+y*y)
 end
@@ -45,13 +40,14 @@ local function fract(x)
     return x-math.floor(x)
 end
 
+local pipeline = import 'pipelines/Display.lua'
+
+
 local T = 0
-while true do
-    local image = ImageHandler:new(
-        screen.sx,
-        screen.sy
-        --math.floor(screen.sy*3/2+0.5)
-    ):process(function(self,u,v)
+
+pipeline
+    :image()
+    :process(function(self,u,v)
         u=(u*2-1)*self.sx/self.sy
         local u0 = u
         v=v*2-1
@@ -73,8 +69,11 @@ while true do
         end
         return Color()
     end)
-
-    screen:render(image):display()
+while true do
+    pipeline:start{
+        term=mon,
+        combinator=combinator
+    }
     sleep()
     T=os.clock()*0.8
 end
