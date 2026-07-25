@@ -72,7 +72,7 @@ function ImageHandler:new(sx,sy,data,debug)
         end
     end
 
-    local o = {sx=sx,sy=sy,data=data,uniqueColors={},debug=debug,modified=true}
+    local o = {sx=sx,sy=sy,data=data,debug=debug,modified=true}
 
     setmetatable(o,{
         __index=function(_,k)
@@ -256,25 +256,25 @@ end
 --[[
 
 	Samples the image to find unique colors used in it.
-    Fills self.uniqueColors with these Colors.
     Used by ImageHandler:findPalette.
 
 	findUniqueColors(
-        self: ImageHandler,
-        interval: ?number | 0.01, // how close the samples are taken (step in u,v)
+        self: ImageHandler
     ) -> ImageHandler
 
 ]]
-function ImageHandler:findUniqueColors(interval)
-    interval = interval or 0.01
-    self.uniqueColors = {}
-    for u=0,1,interval do
-        for v=0,1,interval do
-            local color = self:getPx(u,v) or Color()
-            self.uniqueColors[color:toHex()] = color
+function ImageHandler:findUniqueColors()
+    local colorMap = {}
+    local uniqueColors = {}
+    for i=1,#self.data do
+        local color = self.data[i]
+        local k = color:toHex()
+        if not colorMap[k] then
+            uniqueColors[#uniqueColors+1] = color
+            colorMap[k] = color
         end
     end
-    return self
+    return uniqueColors
 end
 
 --[[
@@ -291,16 +291,17 @@ end
     ) -> [Color]
     
 ]]
-function ImageHandler:findPaletteKmeans(paletteSize,distanceFunction,eps,maxIteration)
+
+function ImageHandler:findPaletteKmeans(uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
     local t
     if self.debug then
         t = os.clock()
         print("start findPalette")
     end
-    self:findUniqueColors()
+    uniqueColors = uniqueColors or self:findUniqueColors()
     distanceFunction = distanceFunction and distanceFunction or Color.distance
     maxIteration=maxIteration and maxIteration or 50
-    eps=eps and eps or 0.00001
+    eps = eps and eps or 0.00001
     paletteSize = paletteSize and paletteSize or 16
     local palette = {}
     for i=1,paletteSize do
@@ -314,7 +315,7 @@ function ImageHandler:findPaletteKmeans(paletteSize,distanceFunction,eps,maxIter
             sleep()
         end
         local clusters = {}
-        for _,c in pairs(self.uniqueColors) do
+        for _,c in pairs(uniqueColors) do
             local minj = 1
             local mind = distanceFunction(c,palette[1])
             for j=2,#palette do
@@ -378,7 +379,7 @@ local function argmax(X)
     return imax
 end
 
-function ImageHandler:findPaletteMedianCut(paletteSize,distanceFunction)
+function ImageHandler:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunction)
     local lightness = 0
     local function medianCut(points,key)
         table.sort(points,function(a,b) return a[key] < b[key] end)
@@ -402,9 +403,9 @@ function ImageHandler:findPaletteMedianCut(paletteSize,distanceFunction)
         end
         return max-min
     end
-    self:findUniqueColors()
+    uniqueColor = uniqueColors or self:findUniqueColors()
     local points = {}
-    for _,p in pairs(self.uniqueColors) do
+    for _,p in pairs(uniqueColors) do
         points[#points+1] = p
         lightness = lightness+p:value()
     end
@@ -426,12 +427,12 @@ function ImageHandler:findPaletteMedianCut(paletteSize,distanceFunction)
     return palette
 end
 
-function ImageHandler:findPalette(method,paletteSize,distanceFunction,eps,maxIteration)
+function ImageHandler:findPalette(method,uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
     method = method or "kmeans"
     if method == "mediancut" then
-        return self:findPaletteMedianCut(paletteSize,distanceFunction)
+        return self:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunction)
     elseif method == "kmeans" then
-        return self:findPaletteKmeans(paletteSize,distanceFunction,eps,maxIteration)
+        return self:findPaletteKmeans(uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
     end
     error("method needs to be either mediancut or kmeans")
 end
