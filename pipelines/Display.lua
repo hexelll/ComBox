@@ -16,7 +16,6 @@ return Pipeline
     }
     :prior("entry")
     :after("entry","resize")
-    :before("render","dither")
     :defer("render")
     :defer("display")
     :before("render","generatePalette")

@@ -18,7 +18,6 @@ return function(_,input)
     input.resizeMean = input.resizeMean == nil and true or input.resizeMean
     input.combinator = input.combinator or input.combinators and input.combinators[1] or import("../combinators/FastCharCombinator.lua"):new()
     input.combinators = input.combinators or {input.combinator}
-    input.dither = input.dither or {}
     input.screen = input.screen or Renderer:new{
         term=input.term,
         combinators=input.combinators,
@@ -28,11 +27,6 @@ return function(_,input)
         py=input.py
     }
     input.combinators = input.screen.combinators
-    input.dither.disable = 
-        input.dither.disable == nil and 
-        not (input.combinators[1].name == "SquarePixelCombinator") 
-        and true 
-        or input.dither.disable
     input.sx,input.sy = input.sx or input.screen.sx, input.sy or input.screen.sy
     local hasSquarePixel = false
     for _,c in pairs(input.combinators) do
