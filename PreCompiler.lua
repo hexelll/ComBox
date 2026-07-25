@@ -36,22 +36,18 @@ local function serizalizeRender(render,referenceDisplay)
     local serialisedPalette = textutils.serialize( render.palette , {compact=true})
     local serialisedLines = serializeLines( render.lines )
 
-    local string = "{\n"
-    .."palette="..serialisedPalette..",\n"
-    .."sx="..render.sx..",\n"
-    .."sy="..render.sy..",\n"
-    .."px="..render.px..",\n"
-    .."py="..render.py..",\n"
-    .."lines="..serialisedLines..",\n"
-    .."display="
+    local display = (referenceDisplay==true) and "display" or displayFunction
 
-    if (referenceDisplay==true)then
-        string = string.."display"
-    else
-        string = string..displayFunction
-    end
-
-    string = string.."\n}"
+    local string = table.concat({
+        "{\npalette=",serialisedPalette,
+        ",\nsx=",render.sx,
+        ",\nsy=",render.sy,
+        ",\npx=",render.px,
+        ",\npy="render.py,
+        ",lines=",serialisedLines,
+        ",\ndisplay=",display,
+        "\n}"
+    })
     
     return string
 end
