@@ -12,9 +12,9 @@ local function toDir(path)
 end
 
 local function combine(dir,path,downloadDir)
-    local path = toRemote(path)
+    path = toRemote(path)
     if type(path) == "table" then 
-        return path,true,downloadDir and fs.combine(downloadDir,path[2])
+        return path[1]..path[2],true,downloadDir and fs.combine(downloadDir,path[2])
     end
     dir = toRemote(dir)
     if type(dir) == "table" then
@@ -37,9 +37,7 @@ local function getContent(path,isRemote,downloadPath)
             end
         end
         local request = http.get(path)
-        if not request then
-            error("no such file at remote "..path)
-        end
+        if not request then error("no such file at remote "..path)end
         local content = request.readAll()
         request.close()
         if downloadPath then

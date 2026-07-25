@@ -1,14 +1,16 @@
-package.path = package.path .. ";../?.lua" -- this is used so we can require from a parent directory
+package.path = package.path .. ";../?.lua" 
 
-local dir = shell.dir()
+local import = require 'import'
 
-shell.setDir(fs.getDir(shell.getRunningProgram()))
+import
+    :setDownloadDir("../vendor/combox")
+    :setDir("https://raw.githubusercontent.com/hexelll/ComBox/refs/heads/dev/")
 
-local import = require "import"
-
-local pipeline = import "../pipelines/Display.lua"
-local MediaParser = import "../MediaParser.lua"
-local Color = import "../Color.lua"
+print("loading Combox")
+local pipeline = import "pipelines/Display.lua"
+local MediaParser = import "MediaParser.lua"
+local Color = import "Color.lua"
+print("finished loading")
 
 local mon = peripheral.find("monitor")
 mon.clear()
@@ -16,9 +18,10 @@ mon.clear()
 local sx,sy = mon.getSize()
 local scx,scy = sx*1,sy*1
 
+local dir = shell.dir()
+shell.setDir(fs.getDir(shell.getRunningProgram()))
 local image = MediaParser:open("../images/"..arg[1]):resize(scx,scy*3/2)
-
-
+local palette = image:findPalette()
 shell.setDir(dir)
 
 pipeline
@@ -32,6 +35,7 @@ pipeline
 
 while true do
     pipeline:start{
+        palette=palette,
         k=(1+math.sin(os.clock()))/2,
         screenx=scx,
         screeny=scy,
