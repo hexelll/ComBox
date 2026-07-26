@@ -383,7 +383,8 @@ function ImageHandler:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunc
         end
         return max-min
     end
-    uniqueColor = uniqueColors or self:findUniqueColors()
+    uniqueColors = uniqueColors or self:findUniqueColors()
+
     local points = {}
     for _,p in pairs(uniqueColors) do
         points[#points+1] = p
