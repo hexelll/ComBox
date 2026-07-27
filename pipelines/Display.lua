@@ -6,7 +6,7 @@ local Pipeline = import "../Pipeline.lua"
 
 return Pipeline:new()
     :prior("entry")
-    :after("entry","resize")
     :defer("render")
     :defer("display")
+    :after("entry","resize")
     :before("render","generatePalette")

@@ -29,16 +29,20 @@ return function(_,input)
     input.masks = input.masks or {}
     input.combinators = input.screen.combinators
     input.sx,input.sy = input.sx or input.screen.sx, input.sy or input.screen.sy
+    local sx,sy = input.sx,input.sy
     local hasSquarePixel = false
     for _,c in pairs(input.combinators) do
-        if c.name == "SquarePixelCombinator" then
-            input.sy = math.floor(0.5+input.sy*3/2)
+        if c.ratio then
+            input.sx = math.max(input.sx,math.floor(0.5+sx*c.ratio.x))
+            input.sy = math.max(input.sx,math.floor(0.5+sy*c.ratio.y))
         end
     end
     if input.image then
         input.image = input.image:duplicate()
     elseif input.path then
         input.image = MediaParser:open(input.path)
+    else
+        input.image = ImageHandler:new(input.sx,input.sy)
     end
     return input
 end

@@ -17,7 +17,7 @@
 
 local Color = import "../Color.lua"
 local chars = {
-    ' ','.','*','+','=','a','@'
+    ' ','.','*',')','+','\7','$','@','\143'
 }
 
 local hexTable = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
@@ -45,6 +45,7 @@ function combinator:new(args)
         cacheSize = args.cacheSize and args.cacheSize or 100,
         chars = args.chars and args.chars or chars,
         invert = args.invert,
+        spread = args.spread or math.sqrt(3),
         maxCol = Color(1,1,1)
     }
     setmetatable(o,{__index=self})
@@ -112,7 +113,7 @@ function combinator:findCombination(u,v,image,palette)
     if cacheCol then
         return cacheCol
     end
-    local k = 1-math.min(math.sqrt(px:distance(self.maxCol))/math.sqrt(3),1)
+    local k = 1-math.min( math.sqrt( px:distance(self.maxCol) )/self.spread ,1 )
     if self.invert then
         k = 1-k
     end
@@ -123,7 +124,7 @@ function combinator:findCombination(u,v,image,palette)
     col[2] = math.max(0,math.min(px[2]*c,1))
     col[3] = math.max(0,math.min(px[3]*c,1))
     
-    local combination = {self.chars[1+round(k*(#chars-1))],hexTable[col:findClosest(palette)],hexTable[Color():findClosest(palette)]}
+    local combination = {self.chars[1+round(k*(#self.chars-1))],hexTable[col:findClosest(palette)],hexTable[Color():findClosest(palette)]}
     if self.invert then
         combination[2],combination[3] = combination[3],combination[2]
     end

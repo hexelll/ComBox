@@ -20,11 +20,11 @@ local Color = import "../Color.lua"
 local patterns = {
     {0,'|'},
     {math.pi,'|'},
-    {math.pi/2,'='},
+    {math.pi/2,'-'},
     {math.pi*3/4,'\\'},
     {math.pi/4,'/'},
-    {math.pi/3,'-'},
-    {math.pi*2/3,'-'}
+    {math.pi/3,'.'},
+    {math.pi*2/3,'.'}
 }
 
 local hexTable = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
@@ -53,7 +53,7 @@ function combinator:new(args)
     local o = {}
     o.invert = args.invert
     o.limit = args.limit and args.limit or 0.2
-    o.defaultchar = args.defaultchar and args.defaultchar or '*'
+    o.defaultchar = args.defaultchar and args.defaultchar or '\143'
     o.patterns = args.patterns and args.patterns or patterns
     setmetatable(o,{__index=self})
     return o

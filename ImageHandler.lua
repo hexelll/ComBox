@@ -71,7 +71,7 @@ function ImageHandler:new(sx,sy,default,data,debug)
         end
     end
     
-    local o = {sx=sx,sy=sy,data=data,debug=debug,modified=true}
+    local o = {sx=sx,sy=sy,data=data,debug=debug or false,modified=true}
 
     setmetatable(o,{
         __index=function(_,k)
@@ -198,6 +198,9 @@ end
 
 ]]
 function ImageHandler:getPx(u,v)
+    if u < 0 or u > 1 or v < 0 or v > 1 then
+        return
+    end
     local index = uvToIndex(self.sx,self.sy,u,v)
     return self.data[index]
 end
@@ -220,6 +223,10 @@ end
 
 ]]
 function ImageHandler:setPx(u,v,color)
+    u,v = round(u*self.sx)/self.sx,round(v*self.sy)/self.sy
+    if u < 0 or u > 1 or v < 0 or v > 1 then
+        return self
+    end
     local index = uvToIndex(self.sx,self.sy,u,v)
     self.data[index] = color
     self.modified = true
@@ -227,6 +234,10 @@ function ImageHandler:setPx(u,v,color)
 end
 
 function ImageHandler:setPxXy(x,y,color)
+    x,y = round(x),round(y)
+    if x < 1 or x > self.sx or v < 1 or v > self.sy then
+        return self
+    end
     local index = xyToIndex(self.sx,x,y)
     self.data[index] = color
     self.modified = true
@@ -247,7 +258,8 @@ function ImageHandler:findUniqueColors()
     local colorMap = {}
     local uniqueColors = {}
     for i=1,#self.data do
-        local color = self.data[i]
+        local color = self.data[i] or Color()
+        color = Color(round(color[1]*20)/20,round(color[2]*20)/20,round(color[3]*255)/255)
         local k = color:toHex()
         if not colorMap[k] then
             uniqueColors[#uniqueColors+1] = color
@@ -492,6 +504,48 @@ function ImageHandler:map(shader,mask,sx,sy)
         end
     end
     return newImg
+end
+
+function ImageHandler:draw(args)
+    args = args or {}
+    local function eval(x,...)
+        return type(x) == 'function' and x(...) or x
+    end
+    local t = type(args.image)
+    if t == 'nil' or (t ~= 'table' and t ~= 'function') then
+        error('ImageHandler.draw expects args.image to be an image or a function ')
+    end
+    local image = eval(args.image,self)
+    local mask = args.mask or function()return true end
+    local maskIsFn = type(mask) == 'function'
+    local function inMask(u,v)
+        if maskIsFn then
+            return mask(self,u,v)
+        end
+        return mask:getPx(u,v)
+    end
+    local function evalVec(v,...)
+        v[1] = v[1] and eval(v[1],...) or 0
+        v[2] = v[2] and eval(v[2],...) or 0
+        if v[3] == 'px' then
+            v[1] = (v[1]-1)/(self.sx-1)
+            v[2] = (v[2]-1)/(self.sy-1)
+        end
+        return v
+    end
+    local from = evalVec(args.from and eval(args.from,self,image) or {0,0})
+    local to = evalVec(args.to and eval(args.to,self,image,from) or {image.sx,image.sy,'px'})
+    local sx = (to[1]-from[1])*self.sx
+    local sy = (to[2]-from[2])*self.sy
+    for i=0,sx do
+        for j=0,sy do
+            local u,v = from[1]+i/self.sx,from[2]+j/self.sy
+            if inMask(u,v) then
+                self:setPx(u,v,image:getPx(i/sx,j/sy))
+            end
+        end
+    end
+    return self
 end
 
 function ImageHandler:value()

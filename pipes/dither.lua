@@ -56,9 +56,11 @@ return function(_,input,alias)
     input.image:process(function(self,u,v)
         local bayer = dither.bayer or 16
         local spread = dither.spread or 0.05
+        local sx = input.screen.sx
         local sy = input.screen.sy
-        if input.combinators[1].name == "SquarePixelCombinator" then
-            sy = math.floor(0.5+sy*3/2)
+        if input.screen.combinators[1].ratio then
+            sx = math.floor(0.5+sx*input.screen.combinators[1].ratio.x)
+            sy = math.floor(0.5+sy*input.screen.combinators[1].ratio.y)
         end
         local x,y = math.floor(0.5+u*(input.screen.sx-1)),math.floor(0.5+v*(sy-1))
         local bayerMat = bayerMatrices[bayer]

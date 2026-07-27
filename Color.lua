@@ -110,13 +110,13 @@ function Color:new(r,g,b,a)
         -- Substraction : 
         __sub=function(a,b)
             if type(a) == "number" and type(b) == "table" then
-                return Color:new(a-b[1],a-b[2],a-b[3],b[4])
+                return Color:new(a-b[1],a-b[2],a-b[3],a-b[4])
             end
             if type(a) == "table" and type(b) == "number" then
-                return Color:new(a[1]-b,a[2]-b,a[3]-b,a[4])
+                return Color:new(a[1]-b,a[2]-b,a[3]-b,a[4]-b)
             end
             if type(a) == "table" and type(b) == "table" then
-                return Color:new(a[1]-b[1],a[2]-b[2],a[3]-b[3],a[4])
+                return Color:new(a[1]-b[1],a[2]-b[2],a[3]-b[3],a[4]-b[4])
             end
         end,
         -- Addition : 
@@ -125,10 +125,10 @@ function Color:new(r,g,b,a)
                 a,b=b,a
             end
             if type(a) == "table" and type(b) == "number" then
-                return Color:new(a[1]+b,a[2]+b,a[3]+b,a[4])
+                return Color:new(a[1]+b,a[2]+b,a[3]+b,a[4]+b)
             end
             if type(a) == "table" and type(b) == "table" then
-                return Color:new(a[1]+b[1],a[2]+b[2],a[3]+b[3])
+                return Color:new(a[1]+b[1],a[2]+b[2],a[3]+b[3],a[4]+b[4])
             end
         end,
         -- Multiplication :
