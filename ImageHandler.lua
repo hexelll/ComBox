@@ -96,7 +96,7 @@ end
 function ImageHandler:duplicate()
     local newData = {}
     for i=1,self.sx*self.sy do
-        newData[i] = self.data[i]:duplicate()
+        newData[i] = self.data[i] and (self.data[i].duplicate and self.data[i]:duplicate() or self.data[i]) or Color()
     end
 
     local img = ImageHandler:new(self.sx,self.sy,nil,newData)
