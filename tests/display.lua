@@ -3,14 +3,14 @@ package.path = package.path..';../?.lua'
 local import = require 'import'
 
 import
-    --:setDownloadDir("/vendor/combox")
-    --:setDir("https://raw.githubusercontent.com/hexelll/ComBox/refs/heads/dev/")
-    :setDir('../')
+    :setDownloadDir("/vendor/combox")
+    :setDir("https://raw.githubusercontent.com/hexelll/ComBox/refs/heads/dev/")
+    --:setDir('../')
 print("loading Combox")
 local pipeline = import "pipelines/Display.lua"
 local MediaParser = import "MediaParser.lua"
 local Color = import "Color.lua"
-local Texture = import "Texture.lua"
+--local Texture = import "Texture.lua"
 local ImageHandler = import "ImageHandler.lua"
 print("finished loading")
 

@@ -62,7 +62,7 @@ end
     
 ]]
 function ImageHandler:new(sx,sy,default,data,debug)
-    local sx,sy = math.max(sx,0),math.max(sy,0)
+    local sx,sy = math.max(round(sx),0),math.max(round(sy),0)
 
     if not data then
         data = {}
