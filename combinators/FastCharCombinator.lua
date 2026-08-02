@@ -1,3 +1,5 @@
+local Color = import '../Color.lua'
+
 --[[
 
     This is a combinator meant to achieve more perceived colors by combining text color and background color
