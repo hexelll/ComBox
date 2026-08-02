@@ -4,8 +4,8 @@ return function(_,input,alias)
     local x = zoom.x or 0
     local y = zoom.y or 0
     input.image = input.image:map(function(self,u,v)
-        u = (u+x) / level + 0.5-0.5/level
-        v = (v+y) / level + 0.5-0.5/level
+        u = (u-0.5) / level + 0.5 + x
+        v = (v-0.5) / level + 0.5 + y
         return self:getPx(u,v)
     end,input.masks[zoom.mask])
     return input

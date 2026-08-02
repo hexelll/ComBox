@@ -68,6 +68,7 @@ function import:new(args)
     local o = {}
     o.cache = args.cache or {}
     o.dir = args.dir or sanitizeDir('/'..fs.getDir(shell.getRunningProgram()))
+    o.baseDir = o.dir
     o.downloadDir = args.downloadDir and sanitizeDir(args.downloadDir)
     setmetatable(o,{
         __call=function(_,...)
@@ -90,6 +91,10 @@ function import:setDir(dir)
     self.dir = dir:sub(1,1) == '/' and dir or fs.combine(self.dir,dir)
     self.dir = sanitizeDir(self.dir)
     return self
+end
+
+function import:resetDir()
+    self:setDir(self.baseDir)
 end
 
 function import:setDownloadDir(dir)

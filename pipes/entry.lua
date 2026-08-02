@@ -2,6 +2,7 @@ if not import then error("use import to use this file not require") end
 
 local Renderer = import "../Renderer.lua"
 local MediaParser = import "../MediaParser.lua"
+local ImageHandler = import "../ImageHandler.lua"
 
 --[[ 
     input: {
