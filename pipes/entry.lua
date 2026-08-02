@@ -29,14 +29,7 @@ return function(_,input)
     input.masks = input.masks or {}
     input.combinators = input.screen.combinators
     input.sx,input.sy = input.sx or input.screen.sx, input.sy or input.screen.sy
-    local sx,sy = input.sx,input.sy
-    local hasSquarePixel = false
-    for _,c in pairs(input.combinators) do
-        if c.ratio then
-            input.sx = math.max(input.sx,math.floor(0.5+sx*c.ratio.x))
-            input.sy = math.max(input.sx,math.floor(0.5+sy*c.ratio.y))
-        end
-    end
+    input.sx,input.sy = input.screen:getSize()
     if input.image then
         input.image = input.image:duplicate()
     elseif input.path then

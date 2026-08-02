@@ -59,6 +59,16 @@ function Renderer:new(params)
     return o
 end
 
+function Renderer:getSize()
+    local sx,sy = self.sx,self.sy
+    for _,c in pairs(self.combinators) do
+        if c.ratio then
+            sx = math.max(sx,math.floor(0.5+self.sx*c.ratio.x))
+            sy = math.max(sx,math.floor(0.5+self.sy*c.ratio.y))
+        end
+    end
+end
+
 --[[
 
     sets the combinator to be used at a point on the screen
