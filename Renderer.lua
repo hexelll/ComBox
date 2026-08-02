@@ -67,6 +67,7 @@ function Renderer:getSize()
             sy = math.max(sx,math.floor(0.5+self.sy*c.ratio.y))
         end
     end
+    return sx,sy
 end
 
 --[[
