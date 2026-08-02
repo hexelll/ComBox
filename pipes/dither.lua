@@ -1,3 +1,5 @@
+local Color = import '../Color.lua'
+
 local bayer2 = {
     {0,2},
     {3,1}
