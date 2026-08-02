@@ -67,7 +67,7 @@ return function(_,input,alias)
         local xn = x % bayer
         local yn = y % bayer
         local M = bayerMat[1+xn][1+yn]/(bayer*bayer)
-        local px = self:getPx(u,v)
+        local px = self:getPx(u,v) or Color()
         return (px + clamp(spread * (M-0.5),-1,1)):clamp()
     end,input.masks[dither.mask])
     return input
