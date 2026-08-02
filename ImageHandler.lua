@@ -257,7 +257,7 @@ end
 function ImageHandler:findUniqueColors()
     local colorMap = {}
     local uniqueColors = {}
-    for i=1,#self.data do
+    for i=1,self.sx*self.sy do
         local color = self.data[i] or Color()
         color = Color(round(color[1]*20)/20,round(color[2]*20)/20,round(color[3]*255)/255)
         local k = color:toHex()
