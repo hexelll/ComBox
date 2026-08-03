@@ -182,7 +182,7 @@ end
 ]]
 function combinator:findCombination(u,v,image,palette)
 
-    local col = image:getPx(u,v) or Color()
+    local col = image:getPx(u,v):sanitize() or Color()
     local hash = col:toHash(self.cacheSize)
     if self.cache[hash] then
         return self.cache[hash]

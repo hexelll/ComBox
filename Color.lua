@@ -193,6 +193,7 @@ end
 	): Color
 ]]
 function Color:mix(color,k)
+    k = k or 0.5
     return Color:new(interp(self[1],color[1],k),interp(self[2],color[2],k),interp(self[3],color[3],k),interp(self[4],color[4],k))
 end
 
@@ -301,13 +302,25 @@ end
     ): String
 ]]
 function Color:toHex()
-    local rgb = {round(self[1]*255),round(self[2]*255),round(self[3]*255)}
+    self:sanitize()
+    local rgb = {
+        round(self[1]*255),
+        round(self[2]*255),
+        round(self[3]*255)
+    }
     local hex = table.concat{
         hexTable[(rgb[1] % 16)+1],hexTable[(round((rgb[1]-(rgb[1] % 16))/16)%16)+1],
         hexTable[(rgb[2] % 16)+1],hexTable[(round((rgb[2]-(rgb[2] % 16))/16)%16)+1],
         hexTable[(rgb[3] % 16)+1],hexTable[(round((rgb[3]-(rgb[3] % 16))/16)%16)+1]
     }
     return hex
+end
+
+function Color:sanitize()
+    self[1] = math.min(1,math.max(0,self[1] == self[1] and self[1] or 0))
+    self[2] = math.min(1,math.max(0,self[2] == self[2] and self[2] or 0))
+    self[3] = math.min(1,math.max(0,self[3] == self[3] and self[3] or 0))
+    return self
 end
 
 --[[
@@ -362,9 +375,9 @@ end
     ): number
 ]]
 function Color:toHash(size)
-    local r = math.floor(self[1]*(size-1)+0.5)
-    local g = math.floor(self[2]*(size-1)+0.5)
-    local b = math.floor(self[3]*(size-1)+0.5)
+    local r = math.floor(math.min(1,math.max(0,self[1]))*(size-1)+0.5)
+    local g = math.floor(math.min(1,math.max(0,self[2]))*(size-1)+0.5)
+    local b = math.floor(math.min(1,math.max(0,self[3]))*(size-1)+0.5)
     return r*size*size+g*size+b
 end
 
