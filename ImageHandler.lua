@@ -154,7 +154,7 @@ function ImageHandler:resizeMean(newSx,newSy)
     end
     local dx = round(self.sx/newSx)
     local dy = round(self.sy/newSy)
-    
+    local t = os.clock()
     for i=0,self.sx-1 do
         for j=0,self.sy-1 do
             local cs = Color()
@@ -178,6 +178,10 @@ function ImageHandler:resizeMean(newSx,newSy)
             cs[3] = k > 0 and cs[3]/k or 0
             local u,v = (i)/(self.sx-1),(j)/(self.sy-1)
             newData[uvToIndex(newSx,newSy,u,v)] = cs
+            if os.clock()-t > 5 then
+                t = os.clock()
+                sleep()
+            end
         end
     end
     self.data = newData
