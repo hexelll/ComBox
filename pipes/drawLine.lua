@@ -39,7 +39,7 @@ return function(_,input,alias)
     
     while true do
         local u,v = x0/(image.sx-1),y0/((image.sy-1))
-        local color = type(col) == "function" and col(from[1]+u,from[2]+v) or col
+        local color = type(col) == "function" and col(from[1]+u,from[2]+v,u,v) or col
         image:setPx(u,v,color)
         local e2 = 2 * err
         if e2 >= dy then
