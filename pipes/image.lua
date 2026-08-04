@@ -44,6 +44,6 @@ return function(self,input,alias)
         image = ImageHandler:new(input.sx,input.sy)
     end
     args.image = image
-    input.image:draw(args)
+    input.image:resize(input.screen:getSize()):draw(args)
     return input
 end
