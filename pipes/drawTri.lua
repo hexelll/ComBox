@@ -72,7 +72,7 @@ return function(_,input,alias)
 
     local x = p[1][1]
     local y = p[1][2]
-    image:setPx(x,y,eval(col,0,0,0,input))
+    image:setPx(x,y,eval(col,x-points[1][1],y-points[1][2],0,x,y,input))
     
     local switched = false
     local line1 = line(p[1],p[2],image)
@@ -98,33 +98,40 @@ return function(_,input,alias)
     local v0,v1 = b - a, c - a
 
     local y1,y2
+    local pixels = {}
     while true do
-        y1 = line1(x*(image.sx-1))
-        y2 = line2(x*(image.sx-1))
+        local X = round(x*(image.sx-1))
+        y1 = line1(X)
+        y2 = line2(X)
         local dy = y2-y1
-        local s = dy >= 0 and 1/4 or -1/4
+        local s = dy > 0 and 1/image.sy or -1/image.sy
+        
         for y=y1,y2,s do
             local u,v = x,y/(image.sy-1)
-            local p = vector.new(u,v,0)
-            local v2 = p - a
-            local d00 = v0:dot(v0)
-            local d01 = v0:dot(v1)
-            local d11 = v1:dot(v1)
-            local d20 = v2:dot(v0)
-            local d21 = v2:dot(v1)
-            local denom = d00 * d11 - d01 * d01
-            V = (d11 * d20 - d01 * d21) / denom
-            W = (d00 * d21 - d01 * d20) / denom
-            U = 1 - V - W;
+            if u >= 0 and u <= 1 and v >= 0 and v <= 1 then
+                local p = vector.new(u,v,0)
+                local v2 = p - a
+                local d00 = v0:dot(v0)
+                local d01 = v0:dot(v1)
+                local d11 = v1:dot(v1)
+                local d20 = v2:dot(v0)
+                local d21 = v2:dot(v1)
+                local denom = d00 * d11 - d01 * d01
+                V = (d11 * d20 - d01 * d21) / denom
+                W = (d00 * d21 - d01 * d20) / denom
+                U = 1 - V - W
 
-            U,V,W = math.min(1,math.max(0,U)),math.min(1,math.max(0,V)),math.min(1,math.max(0,W))
-
-            image:setPx(u,v,eval(col,U,V,W,u,v,input,alias))
+                U,V,W = math.min(1,math.max(0,U)),math.min(1,math.max(0,V)),math.min(1,math.max(0,W))
+                pixels[#pixels+1] = {u,v,eval(col,U,V,W,u,v,input,alias)}
+            end
         end
 
         x=x+dx
 
         if x >= p[2][1] and x >= p[3][1] then
+            for _,p in pairs(pixels) do
+                image:setPx(p[1],p[2],p[3])
+            end
             return input
         end
         if not switched and x >= p[2][1] then
@@ -136,6 +143,9 @@ return function(_,input,alias)
             switched = true
         end
         if not line2 or not line1 then
+            for _,p in pairs(pixels) do
+                image:setPx(p[1],p[2],p[3])
+            end
             return input
         end
     end

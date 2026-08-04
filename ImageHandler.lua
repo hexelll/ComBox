@@ -158,6 +158,7 @@ function ImageHandler:resizeMean(newSx,newSy)
     for i=0,self.sx-1 do
         for j=0,self.sy-1 do
             local cs = Color()
+            cs[4] = 0
             local k = 0
             for di=0,dx do
                 for dj=0,dy do
@@ -168,6 +169,7 @@ function ImageHandler:resizeMean(newSx,newSy)
                             cs[1] = cs[1] + px[1]
                             cs[2] = cs[2] + px[2]
                             cs[3] = cs[3] + px[3]
+                            cs[4] = cs[4] + px[4]
                             k=k+1
                         end
                     end
@@ -176,6 +178,7 @@ function ImageHandler:resizeMean(newSx,newSy)
             cs[1] = k > 0 and cs[1]/k or 0
             cs[2] = k > 0 and cs[2]/k or 0
             cs[3] = k > 0 and cs[3]/k or 0
+            cs[4] = k > 0 and cs[4]/k or 0
             local u,v = (i)/(self.sx-1),(j)/(self.sy-1)
             newData[uvToIndex(newSx,newSy,u,v)] = cs
             if os.clock()-t > 5 then
@@ -515,11 +518,6 @@ function ImageHandler:draw(args)
     local function eval(x,...)
         return type(x) == 'function' and x(...) or x
     end
-    local t = type(args.image)
-    if t == 'nil' or (t ~= 'table' and t ~= 'function') then
-        error('ImageHandler.draw expects args.image to be an image or a function ')
-    end
-    local image = eval(args.image,self)
     local mask = args.mask or function()return true end
     local maskIsFn = type(mask) == 'function'
     local function inMask(u,v)
@@ -528,22 +526,31 @@ function ImageHandler:draw(args)
         end
         return mask:getPx(u,v)
     end
-    local function evalVec(v,...)
-        v[1] = v[1] and eval(v[1],...) or 0
-        v[2] = v[2] and eval(v[2],...) or 0
-        if v[3] == 'px' then
+    local function evalVec(u,...)
+        local v = {}
+        v[1] = u[1] and eval(u[1],...) or 0
+        v[2] = u[2] and eval(u[2],...) or 0
+        if u[3] == 'px' then
             v[1] = (v[1]-1)/(self.sx-1)
             v[2] = (v[2]-1)/(self.sy-1)
         end
         return v
     end
-    local from = evalVec(args.from and eval(args.from,self,image) or {0,0})
-    local to = evalVec(args.to and eval(args.to,self,image,from) or {image.sx,image.sy,'px'})
-    local sx = (to[1]-from[1])*self.sx
-    local sy = (to[2]-from[2])*self.sy
+    local from = evalVec(args.from and eval(args.from,self) or {0,0})
+    local to = evalVec(args.to and eval(args.to,self,from) or {1,1})
+    local sx = (to[1]-from[1])*(self.sx)
+    local sy = (to[2]-from[2])*(self.sy)
+    local image = args.image and eval(args.image,self,sx,sy) or ImageHandler:new(sx,sy)
+    if args.color then
+        if type(args.color) == 'table' then
+            image:process(function()return args.color end)
+        else
+            image:process(function(s,u,v)return args.color(self,u,v,math.min(u*sx/(self.sx)+from[1],1),math.min(1,v*sy/(self.sy)+from[2])) end)
+        end
+    end
     for i=0,sx do
         for j=0,sy do
-            local u,v = from[1]+i/self.sx,from[2]+j/self.sy
+            local u,v = from[1]+i/(self.sx),from[2]+j/(self.sy)
             if inMask(u,v) then
                 self:setPx(u,v,image:getPx(i/sx,j/sy))
             end

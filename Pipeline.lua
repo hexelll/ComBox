@@ -137,7 +137,7 @@ function Pipeline:runPipe(pipe,input,pipeType)
         output[pipe[2]] = output[pipe[2]] or {}
         local o = output[pipe[2]]
         for k,v in pairs(pipe[3]) do
-            if not o[k] then
+            if o[k] == nil then
                 o[k] = v
             end
         end
