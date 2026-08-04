@@ -286,7 +286,7 @@ function Color.fromHex(hex)
     local j = hex:sub(1,1) == "#" and 1 or 0
     local rgb = {}
     for i=0,math.floor((#hex-j)/2)-1 do
-        local n = hexTableI[hex:sub(j+2*i+1,j+2*i+1)]+hexTableI[hex:sub(j+2*i+2,j+2*i+2)]*16
+        local n = hexTableI[hex:sub(j+2*i+1,j+2*i+1)]*16+hexTableI[hex:sub(j+2*i+2,j+2*i+2)]
         rgb[i+1] = n/255
     end
     return Color:new(table.unpack(rgb))
