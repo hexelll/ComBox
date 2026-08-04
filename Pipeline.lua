@@ -29,6 +29,22 @@ function Pipeline:new(args)
     return o
 end
 
+local function deep_copy(t)
+    local copy = {}
+    for k,v in pairs(t) do
+        if type(v) == 'table' then
+            copy[k] = deep_copy(v)
+        else
+            copy[k] = v
+        end
+    end
+    return copy
+end
+
+function Pipeline:duplicate()
+    return Pipeline:new(deep_copy(self))
+end
+
 function Pipeline.makePipe(pipe,alias,default)
     default = type(alias) == 'table' and alias or default
     default = default or {}
