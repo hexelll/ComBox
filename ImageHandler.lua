@@ -160,10 +160,10 @@ function ImageHandler:resizeMean(newSx,newSy)
             local cs = Color()
             cs[4] = 0
             local k = 0
-            for di=0,dx do
-                for dj=0,dy do
+            for di=1,dx do
+                for dj=1,dy do
                     local u,v = (i+di)/(self.sx-1),(j+dj)/(self.sy-1)
-                    if u <= 1 and v <= 1 then
+                    if u >= 0 and u <= 1 and v >= 0 and v <= 1 then
                         local px = self:getPx(u,v)
                         if px then
                             cs[1] = cs[1] + px[1]
@@ -180,7 +180,7 @@ function ImageHandler:resizeMean(newSx,newSy)
             cs[3] = k > 0 and cs[3]/k or 0
             cs[4] = k > 0 and cs[4]/k or 0
             local u,v = (i)/(self.sx-1),(j)/(self.sy-1)
-            newData[uvToIndex(newSx,newSy,u,v)] = cs
+            newData[uvToIndex(newSx,newSy,u+1/newSx,v+1/newSy)] = cs
             if os.clock()-t > 5 then
                 t = os.clock()
                 sleep()
