@@ -49,7 +49,8 @@ function Renderer:new(params)
     o.px,o.py = params.px and params.px or 0, params.py and params.py or 0
     o.debug = params.debug
     if not o.mask then
-        o.mask = ImageHandler:new(o.sx,o.sy,o.combinators[1])
+        local sx,sy = self.getSize(o)
+        o.mask = ImageHandler:new(sx,sy,o.combinators[1])
     end
     setmetatable(o,{
         __index=function(_,k)
