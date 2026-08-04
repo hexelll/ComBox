@@ -31,6 +31,7 @@ return function(_,input)
     input.combinators = input.screen.combinators
     input.sx,input.sy = input.sx or input.screen.sx, input.sy or input.screen.sy
     input.sx,input.sy = input.screen:getSize()
+    input.screen.mask = ImageHandler:new(input.sx,input.sy,input.combinators[1])
     if input.image then
         input.image = input.image:duplicate()
     elseif input.path then
