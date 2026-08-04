@@ -518,14 +518,6 @@ function ImageHandler:draw(args)
     local function eval(x,...)
         return type(x) == 'function' and x(...) or x
     end
-    local mask = args.mask or function()return true end
-    local maskIsFn = type(mask) == 'function'
-    local function inMask(u,v)
-        if maskIsFn then
-            return mask(self,u,v)
-        end
-        return mask:getPx(u,v)
-    end
     local function evalVec(u,...)
         local v = {}
         v[1] = u[1] and eval(u[1],...) or 0
@@ -535,6 +527,14 @@ function ImageHandler:draw(args)
             v[2] = (v[2]-1)/(self.sy-1)
         end
         return v
+    end
+    local mask = args.mask or function()return true end
+    local maskIsFn = type(mask) == 'function'
+    local function inMask(u,v)
+        if maskIsFn then
+            return mask(self,u,v)
+        end
+        return mask:getPx(u,v)
     end
     local from = evalVec(args.from and eval(args.from,self) or {0,0})
     local to = evalVec(args.to and eval(args.to,self,from) or {1,1})
