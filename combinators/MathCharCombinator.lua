@@ -178,7 +178,7 @@ end
 
 ]]
 function combinator:findCombination(u,v,image,palette)
-    local searchedColor = image:getPx(u,v)
+    local searchedColor = image:getPx(u,v) or Color()
 
     -- cache 
     local index = searchedColor:toHash(self.cacheSize)
