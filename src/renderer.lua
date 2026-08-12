@@ -1,7 +1,7 @@
 if not import then error("use import to use this file not require") end
 
 local Color = import "./color.lua"
-local ImageHandler = import "./image.lua"
+local Image = import "./image.lua"
 
 local function round(x)
     return math.floor(x+0.4999)
@@ -15,7 +15,7 @@ local Renderer = {}
 	Creates new Renderer instance.
     Given every combinator instance used by the render (so their on...Change() can be called).
     Given a mask to define which combinator to use for every texel in the render.
-    The mask is an ImageHandler with the same size as the Renderer,
+    The mask is an Image with the same size as the Renderer,
     filled with combinators (same instances as given in combinator).
 
 	new(
@@ -27,7 +27,7 @@ local Renderer = {}
             sy:          ?number | term.height              // y size
             px:          ?number | 0                        // x position
             py:          ?number | 0                        // y position
-            mask:        ?ImageHandler | [ combinators[1] ] // mask
+            mask:        ?Image | [ combinators[1] ] // mask
             debug:       bool
         }       
 	) -> Renderer
@@ -48,7 +48,7 @@ function Renderer:new(sx,sy,combinators,mask)
     o.mask = mask
     if not o.mask then
         local sx,sy = self.getSize(o)
-        o.mask = ImageHandler:new(sx,sy,o.combinators[1])
+        o.mask = Image:new(sx,sy,o.combinators[1])
     end
 
     setmetatable(o,{
@@ -134,7 +134,7 @@ end
 
     render(
         self: Renderer,
-        image: ImageHandler,
+        image: Image,
         palette: ?[Color] | image:findPalette()
     ) -> {
         lines: [ [char,char,char] ],
@@ -189,8 +189,6 @@ function Renderer:render(image,palette)
         palette=palette,
         sx=self.sx,
         sy=self.sy,
-        px=self.px,
-        py=self.py,
         display=function(self,win)
             for i=1,#self.palette do
                 win.setPaletteColor(2^(i-1),self.palette[i][1],self.palette[i][2],self.palette[i][3])
