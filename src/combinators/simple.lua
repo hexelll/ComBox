@@ -19,7 +19,7 @@
 
 local Color = import "../Color.lua"
 
-local combinator = {name="SimpleCombinator"}
+local combinator = {name="SimpleCombinator",type='combinator'}
 
 local hexTable = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
 

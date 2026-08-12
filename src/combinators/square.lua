@@ -18,7 +18,7 @@
 
 local Color = import "../Color.lua"
 
-local combinator = {ratio={x=1,y=3/2}}
+local combinator = {ratio={x=1,y=3/2},type='combinator'}
 
 local hexTable = {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"}
 

@@ -4,11 +4,11 @@
     Pixel data is a in a big array of Color objects.
     Uses UV coordinates as numbers in the [0,1] range
 
-    ImageHandler: {
+    Image: {
         sx: number,
         sy: number,
         data: [Color],
-        uniqueColors: [Color], // initialised as {} by ImageHandler:new()
+        uniqueColors: [Color], // initialised as {} by Image:new()
         debug: bool
     }
 
@@ -18,7 +18,7 @@ if not import then error("use import to use this file not require") end
 
 local Color = import "./color.lua"
 
-local ImageHandler = {}
+local Image = {type='image'}
 
 
 local function round(x)
@@ -43,41 +43,57 @@ local function uvToIndex(sx,sy,u,v)
     return xyToIndex(sx,x,y)
 end
 
-function ImageHandler:uvToXy(u,v)
+function Image:uvToXy(u,v)
     return uvToXy(self.sx,self.sy,u,v)
 end
 
 --[[
 
-	Creates new instance of ImageHandler.
+	Creates new instance of Image.
 
 	new(
-        self:  ImageHandler
+        self:  Image
 		sx:    number,        // x size
         sy:    number,        // y size
         data:  ?[Color],      // Array of pixel Colors, 
                               // if nil : filled with transparent Black ( Color:new(0,0,0,0) )
-        debug: ?bool | false         
-	): ImageHandler
+	): Image
     
 ]]
-function ImageHandler:new(sx,sy,default,data,debug)
+function Image:new(sx,sy,default,data)
     local sx,sy = math.max(round(sx),0),math.max(round(sy),0)
+    default = default or Color()
 
-    if not data then
-        data = {}
-        for i=1,sx*sy do
-            data[i] = default or Color()
-        end
-    end
-    
-    local o = {sx=sx,sy=sy,data=data,debug=debug or false,modified=true}
+    local o = { sx=sx, sy=sy, colors={} }
 
     setmetatable(o,{
         __index=function(_,k)
             return self[k]
         end
     })
+
+    if not data then
+        data = {}
+        local isColor = type(default) == 'table' and default.type == 'color'
+        if isColor then
+            local h = default:toHash(255)
+            o.colors[h] = {color=default}
+        end
+        for i=1,sx*sy do
+            if isColor then
+                o.colors[h][#o.colors[h]+1] = i
+            end
+            data[i] = default
+        end
+    else
+        for i,color in pairs(data) do
+            local h = color:toHash(255)
+            o.colors[h] = o.colors[h] or {color=color}
+            o.colors[h][#o.colors[h]+1] = i
+        end
+    end
+    
+    o.data = data
 
     return o
 end
@@ -89,17 +105,19 @@ end
     not just referenced.
 
 	duplicate(
-        self: ImageHandler
-    ) -> ImageHandler
+        self: Image
+    ) -> Image
 
 ]]
-function ImageHandler:duplicate()
+function Image:duplicate()
     local newData = {}
+    local colors = {}
     for i=1,self.sx*self.sy do
-        newData[i] = self.data[i] and (type(self.data[i]) == 'table' and self.data[i].duplicate and self.data[i]:duplicate() or self.data[i]) or Color()
+        local color = self.data[i] and (type(self.data[i]) == 'table' and self.data[i].duplicate and self.data[i]:duplicate() or self.data[i]) or Color()
+        newData[i] = color
     end
 
-    local img = ImageHandler:new(self.sx,self.sy,nil,newData)
+    local img = Image:new(self.sx,self.sy,nil,newData)
     return img
 end
 
@@ -109,13 +127,13 @@ end
     Fast and preserves hard edges, but may appear jagged when scaled.
 
 	resize(
-        self: ImageHandler,
+        self: Image,
         newSx: number, 
         newSy: number   
-    ) -> ImageHandler
+    ) -> Image
 
 ]]
-function ImageHandler:resize(newSx, newSy)
+function Image:resize(newSx, newSy)
     local newData = {}
     newSx = round(newSx)
     newSy = round(newSy)
@@ -125,7 +143,8 @@ function ImageHandler:resize(newSx, newSy)
     for i=0,newSx-1 do
         for j=0,newSy-1 do
             local u,v = i/(newSx-1),j/(newSy-1)
-            newData[uvToIndex(newSx,newSy,u,v)] = self:getPx(u,v)
+            local index,color = uvToIndex(newSx,newSy,u,v),self:getPx(u,v)
+            newData[index] = color
         end
     end
     self.data = newData
@@ -136,18 +155,19 @@ end
 
 --[[
 
-	Resizes the image while keeping more detail then ImageHandler.resize but is much slower.
+	Resizes the image while keeping more detail then Image.resize but is much slower.
     Each pixel in the resized image is the average Color of a region of pixels from the original image.
     This is smoother than resize() but also slower and less crisp.
 
 	resizeMean(
-        self: ImageHandler,
+        self: Image,
         newSx: number, 
         newSy: number   
-    ) -> ImageHandler
+    ) -> Image
 
 ]]
-function ImageHandler:resizeMean(newSx,newSy)
+function Image:resizeMean(newSx,newSy) -- TODO: switch to convolution
+    newSx,newSy = round(newSx),round(newSy)
     local newData = {}
     if newSx > self.sx or newSy > self.sy then
         return self:resize(newSx,newSy)
@@ -198,13 +218,13 @@ end
 	Returns the Color at a specific point (u,v) of the image.
 
 	getPx(
-        self: ImageHandler,
+        self: Image,
         u: number, 
         v: number   
     ) -> Color
 
 ]]
-function ImageHandler:getPx(u,v)
+function Image:getPx(u,v)
     if u < 0 or u > 1 or v < 0 or v > 1 then
         return
     end
@@ -212,9 +232,31 @@ function ImageHandler:getPx(u,v)
     return self.data[index]
 end
 
-function ImageHandler:getPxXy(x,y)
+function Image:getPxXy(x,y)
     local index = xyToIndex(self.sx,x,y)
     return self.data[index]
+end
+
+function Image:registerColor(color,index)
+    if type(color) == 'table' and color.type == 'color' then
+        local currentColor = self.data[index]
+        if currentColor then
+            local indices = self.colors[currentColor:toHash(255)]
+            if indices and #indices > 0 then
+                local i = 1
+                for k,v in pairs(indices) do
+                    if v == index then
+                        i = k
+                        break
+                    end
+                end
+                indices:remove(i)
+            end
+        end
+        local h = color:toHash(255)
+        indices = self.colors[h] or {color=color}
+        indices[#indices+1] = index
+    end
 end
 
 --[[
@@ -222,30 +264,32 @@ end
 	Sets the Color at a specific point (u,v) of the image.
 
 	setPx(
-        self: ImageHandler,
+        self: Image,
         u: number, 
         v: number,
         color: Color // new color for the point
-    ) -> ImageHandler
+    ) -> Image
 
 ]]
-function ImageHandler:setPx(u,v,color)
+function Image:setPx(u,v,color)
     u,v = round(u*self.sx)/self.sx,round(v*self.sy)/self.sy
     if u < 0 or u > 1 or v < 0 or v > 1 then
         return self
     end
     local index = uvToIndex(self.sx,self.sy,u,v)
+    self:registerColor(color,index)
     self.data[index] = color
     self.modified = true
     return self
 end
 
-function ImageHandler:setPxXy(x,y,color)
+function Image:setPxXy(x,y,color)
     x,y = round(x),round(y)
     if x < 1 or x > self.sx or v < 1 or v > self.sy then
         return self
     end
     local index = xyToIndex(self.sx,x,y)
+    self:registerColor(color,index)
     self.data[index] = color
     self.modified = true
     return self
@@ -254,23 +298,19 @@ end
 --[[
 
 	Samples the image to find unique colors used in it.
-    Used by ImageHandler:findPalette.
+    Used by Image:findPalette.
 
 	findUniqueColors(
-        self: ImageHandler
-    ) -> ImageHandler
+        self: Image
+    ) -> Image
 
 ]]
-function ImageHandler:findUniqueColors()
+function Image:findUniqueColors()
     local colorMap = {}
     local uniqueColors = {}
-    for i=1,self.sx*self.sy do
-        local color = self.data[i] or Color()
-        color = Color(round(color[1]*20)/20,round(color[2]*20)/20,round(color[3]*255)/255)
-        local k = color:toHex()
-        if not colorMap[k] then
-            uniqueColors[#uniqueColors+1] = color
-            colorMap[k] = color
+    for k,entries in pairs(self.colors) do
+        if #entries > 0 then
+            uniqueColors[#uniqueColors+1] = entries.color
         end
     end
     return uniqueColors
@@ -282,7 +322,7 @@ end
     for more information on how this works : https://www.kaggle.com/code/priyamchoksi/kmeanscolorization
 
 	findPaletteKmeans(
-        self: ImageHandler
+        self: Image
         distanceFunction: ?function | Color.distance  
         paletteSize:      ?number   | 16,
         eps:              ?number   | 0.00001, // decides when to stop the algorithm, bigger eps means faster search but worse results
@@ -291,7 +331,7 @@ end
     
 ]]
 
-function ImageHandler:findPaletteKmeans(uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
+function Image:findPaletteKmeans(uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
     local t
     if self.debug then
         t = os.clock()
@@ -378,7 +418,7 @@ local function argmax(X)
     return imax
 end
 
-function ImageHandler:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunction)
+function Image:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunction)
     local lightness = 0
     local function medianCut(points,key)
         table.sort(points,function(a,b) return a[key] < b[key] end)
@@ -427,7 +467,7 @@ function ImageHandler:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunc
     return palette
 end
 
-function ImageHandler:findPalette(method,uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
+function Image:findPalette(method,uniqueColors,paletteSize,distanceFunction,eps,maxIteration)
     method = method or "kmeans"
     if method == "mediancut" then
         return self:findPaletteMedianCut(uniqueColors,paletteSize,distanceFunction)
@@ -442,16 +482,16 @@ end
 	Applies a shader to the image.
 
 	process(
-        self: ImageHandler,
+        self: Image,
         shader: function(
-            self: ImageHandler, 
+            self: Image, 
             u: number, 
             v: number
         ): Color
-    ): ImageHandler
+    ): Image
     
 ]]
-function ImageHandler:process(shader,mask)
+function Image:process(shader,mask)
     local t
     if self.debug then
         t = os.clock()
@@ -482,17 +522,17 @@ end
 	Creates a new image from a shader and a size.
 
 	map(
-        self: ImageHandler,
+        self: Image,
         shader: function,
         sx: ?number | self.sx,
         sy: ?number | self.sy
-    ): ImageHandler
+    ): Image
 
 ]]
-function ImageHandler:map(shader,mask,sx,sy)
+function Image:map(shader,mask,sx,sy)
     sx = sx and sx or self.sx
     sy = sy and sy or self.sy
-    local newImg = ImageHandler:new(sx,sy)
+    local newImg = Image:new(sx,sy)
     local timeYield = os.clock()
     for i=0,sx-1 do
         for j=0,sy-1 do
@@ -513,7 +553,7 @@ function ImageHandler:map(shader,mask,sx,sy)
     return newImg
 end
 
-function ImageHandler:draw(args)
+function Image:draw(args)
     args = args or {}
     local function eval(x,...)
         return type(x) == 'function' and x(...) or x
@@ -540,7 +580,7 @@ function ImageHandler:draw(args)
     local to = evalVec(args.to and eval(args.to,self,from) or {1,1})
     local sx = (to[1]-from[1])*(self.sx)
     local sy = (to[2]-from[2])*(self.sy)
-    local image = args.image and eval(args.image,self,sx,sy) or ImageHandler:new(sx,sy)
+    local image = args.image and eval(args.image,self,sx,sy) or Image:new(sx,sy)
     if args.color then
         if type(args.color) == 'table' then
             image:process(function()return args.color end)
@@ -559,14 +599,14 @@ function ImageHandler:draw(args)
     return self
 end
 
-function ImageHandler:value()
+function Image:value()
     return self:map(function(s,u,v)
         local k = s:getPx(u,v):value()
         return Color(k,k,k)
     end)
 end
 
-function ImageHandler:max()
+function Image:max()
     local maxCol = Color()
     local maxVal = 0
     for _,col in pairs(self.data) do
@@ -582,11 +622,11 @@ end
 	Linearizes every Color in the Image.
 
 	linearize(
-        self: ImageHandler
-    ) -> ImageHandler
+        self: Image
+    ) -> Image
 
 ]]
-function ImageHandler:linearize()
+function Image:linearize()
     return self:process(function(s,u,v)
         local px = s:getPx(u,v)
         return px:linearize()
@@ -598,15 +638,15 @@ end
 	Same as linearize but with a different function
 
 	gamma2(
-        self: ImageHandler
-    ) -> ImageHandler
+        self: Image
+    ) -> Image
 
 ]]
-function ImageHandler:gamma2()
+function Image:gamma2()
     return self:process(function(s,u,v)
         local px = s:getPx(u,v)
         return px:gamma2()
     end)
 end
 
-return ImageHandler
+return Image

@@ -24,7 +24,7 @@
 
 ]]
 
-local Color = {}
+local Color = {type='color'}
 
 local hexTable = {
     "0",

@@ -144,33 +144,16 @@ end
 ]]
 function Renderer:render(image,palette)
     local t
-    if not palette and image.modified then
+    if not palette then
         palette = image:findPalette()
-        image.modified = false
         for _,combinator in pairs(self.combinators) do
             combinator:onImageChange(image,palette,self)
         end
     end
-    palette = palette and palette or self.lastPalette
-    local equal = true
-    if self.lastPalette then
-        for i=1,#palette do
-            if not (self.lastPalette[i] == palette[i]) then
-                equal = false
-                break
-            end
-        end
-    else
-        equal = false
-    end
-    if not equal then
-        for _,combinator in pairs(self.combinators) do
-            combinator:onPaletteChange(palette,self)
-        end
+    for _,combinator in pairs(self.combinators) do
+        combinator:onPaletteChange(palette,self)
     end
     
-    self.lastPalette = palette
-    self.palette = palette
     local timeYield = os.clock()
     local lines = {}
     for i=1,self.sy do
@@ -208,13 +191,13 @@ function Renderer:render(image,palette)
         sy=self.sy,
         px=self.px,
         py=self.py,
-        display=function(self,window)
+        display=function(self,win)
             for i=1,#self.palette do
-                window.setPaletteColor(2^(i-1),self.palette[i][1],self.palette[i][2],self.palette[i][3])
+                win.setPaletteColor(2^(i-1),self.palette[i][1],self.palette[i][2],self.palette[i][3])
             end
             for i=1,self.sy do
-                window.setCursorPos(1,i)
-                window.blit(table.unpack(self.lines[i]))
+                win.setCursorPos(1,i)
+                win.blit(table.unpack(self.lines[i]))
             end
             return self
         end

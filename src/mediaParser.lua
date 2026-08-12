@@ -26,6 +26,7 @@ local png = import "./outsideLibs/png.lua"
 local qoi = import "./outsideLibs/qoi.lua"
 
 local MediaParser = {
+    type='mediaParser',
     -- all supported image type/format and their corresponding decoder/encoder
     parsers = {
         qoi={

@@ -100,6 +100,7 @@ end
 
 function import:resetSourcePath()
     self:setSourcePath(self.baseDir)
+    return self
 end
 
 function import:setCachePath(dir)
