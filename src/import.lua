@@ -1,9 +1,9 @@
 local function toRemote(path)
     local fhttps = path:find("https")
     local fhttp = path:find("http")
-    local prefix = fhttps and fhttps == 1 and "https" or fhttp and fhttp == 1 and "http" or ""
+    local prefix = fhttps and fhttps == 1 and "https://" or fhttp and fhttp == 1 and "http://" or ""
     if #prefix == 0 then return path end
-    local i = path:sub(#("https://")+1,#path):find("/")
+    local i = #prefix+path:sub(#prefix+1,#path):find("/")
     return {path:sub(1,i-1),path:sub(i,#path)}
 end
 
@@ -19,7 +19,7 @@ local function combine(dir,path,downloadDir)
     dir = toRemote(dir)
     if type(dir) == "table" then
         return 
-            dir[1]..fs.combine(toDir(dir[2]),path),
+            dir[1]..'/'..fs.combine(toDir(dir[2]),path),
             true,
             downloadDir and fs.combine(downloadDir,path)
     end
@@ -83,21 +83,26 @@ end
 
 
 -- dir can be an url
-function import:setDir(dir)
+function import:setSourcePath(dir)
     if dir:find("http") ~= nil then
         self.dir = dir
         return self
     end
-    self.dir = dir:sub(1,1) == '/' and dir or fs.combine(self.dir,dir)
-    self.dir = sanitizeDir(self.dir)
+    local currentDir = toRemote(self.dir)
+    if type(currentDir) == 'table' then
+        self.dir = dir:sub(1,1) == '/' and dir or currentDir[1] .. sanitizeDir(fs.combine(currentDir[2],dir))
+    else
+        self.dir = dir:sub(1,1) == '/' and dir or fs.combine(currentDir,dir)
+        self.dir = sanitizeDir(self.dir)
+    end
     return self
 end
 
-function import:resetDir()
+function import:resetSourcePath()
     self:setDir(self.baseDir)
 end
 
-function import:setDownloadDir(dir)
+function import:setCachePath(dir)
     self.downloadDir = dir:sub(1,1) == '/' and dir or fs.combine(self.dir,dir)
     self.downloadDir = sanitizeDir(self.downloadDir)
     return self
@@ -105,6 +110,7 @@ end
 
 function import:resetCache(cache)
     self.cache = {}
+    fs.delete(self.downloadDir)
     return self
 end
 
