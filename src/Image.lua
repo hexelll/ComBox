@@ -16,7 +16,7 @@
 
 if not import then error("use import to use this file not require") end
 
-local Color = import "./Color.lua"
+local Color = import "./color.lua"
 
 local ImageHandler = {}
 

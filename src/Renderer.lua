@@ -1,7 +1,7 @@
 if not import then error("use import to use this file not require") end
 
-local Color = import "./Color.lua"
-local ImageHandler = import "./ImageHandler.lua"
+local Color = import "./color.lua"
+local ImageHandler = import "./image.lua"
 
 local function round(x)
     return math.floor(x+0.4999)
