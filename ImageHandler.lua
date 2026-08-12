@@ -466,7 +466,7 @@ function ImageHandler:process(shader,mask)
             end
             local u,v = i/(self.sx-1),j/(self.sy-1)
             if not mask or mask:getPx(u,v) then
-                local color = shader(self,u,v)
+                local color = shader(self,u,v,i+1,j+1)
                 self:setPx(u,v,color)
             end
         end
@@ -503,7 +503,7 @@ function ImageHandler:map(shader,mask,sx,sy)
             local u,v = i/(sx-1),j/(sy-1)
             local color
             if not mask or mask:getPx(u,v) then
-                color = shader(self,u,v)
+                color = shader(self,u,v,i+1,j+1)
             else
                 color = self:getPx(u,v)
             end
