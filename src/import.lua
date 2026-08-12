@@ -99,7 +99,7 @@ function import:setSourcePath(dir)
 end
 
 function import:resetSourcePath()
-    self:setDir(self.baseDir)
+    self:setSourcePath(self.baseDir)
 end
 
 function import:setCachePath(dir)
