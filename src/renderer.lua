@@ -33,25 +33,24 @@ local Renderer = {}
 	) -> Renderer
 
 ]]
-function Renderer:new(params)
+function Renderer:new(sx,sy,combinators,mask)
     local o = {}
-    o.term = params.term and params.term or term
-    o.combinators = params.combinators and params.combinators or error("no combinators given")
+    
+    o.combinators = combinators and combinators or error("no combinators given")
     for i,c in pairs(o.combinators) do
         if type(c) == "string" then
             o.combinators[i] = import("./combinators/"..c..".lua"):new()
         end
     end
-    local width,height = o.term.getSize()
-    o.sx,o.sy = params.sx and params.sx or width, params.sy and params.sy or height
-    o.sx,o.sy = round(o.sx),round(o.sy)
-    o.mask = params.mask
-    o.px,o.py = params.px and params.px or 0, params.py and params.py or 0
-    o.debug = params.debug
+    
+    o.sx,o.sy = sx,sy
+
+    o.mask = mask
     if not o.mask then
         local sx,sy = self.getSize(o)
         o.mask = ImageHandler:new(sx,sy,o.combinators[1])
     end
+
     setmetatable(o,{
         __index=function(_,k)
             return self[k]
@@ -145,10 +144,6 @@ end
 ]]
 function Renderer:render(image,palette)
     local t
-    if self.debug then
-        t = os.clock()
-        print("start render")
-    end
     if not palette and image.modified then
         palette = image:findPalette()
         image.modified = false
@@ -206,9 +201,6 @@ function Renderer:render(image,palette)
         lines[i][2] = table.concat(lines[i][2])
         lines[i][3] = table.concat(lines[i][3])
     end
-    if self.debug then
-        print("end render:",os.clock()-t)
-    end
     return {
         lines=lines,
         palette=palette,
@@ -216,41 +208,17 @@ function Renderer:render(image,palette)
         sy=self.sy,
         px=self.px,
         py=self.py,
-        display=function()
-            self:display(lines,palette)
-        return self
-    end}
-end
-
---[[
-
-    displays an array of lines to the renderer term
-
-    display(
-        self: Renderer,
-        lines: [ [char,char,char] ],
-        palette?: [ Color ]
-    ) -> Renderer
-
-]]
-function Renderer:display(lines,palette)
-    local t
-    if self.debug then
-        t = os.clock()
-        print("start display")
-    end
-    local palette = palette or self.palette
-    for i=1,#palette do
-        self.term.setPaletteColor(2^(i-1),palette[i][1],palette[i][2],palette[i][3])
-    end
-    for i=1,self.sy do
-        self.term.setCursorPos(1+self.px,i+self.py)
-        self.term.blit(table.unpack(lines[i]))
-    end
-    if self.debug then
-        print("end display:",os.clock()-t)
-    end
-    return self
+        display=function(self,window)
+            for i=1,#self.palette do
+                window.setPaletteColor(2^(i-1),self.palette[i][1],self.palette[i][2],self.palette[i][3])
+            end
+            for i=1,self.sy do
+                window.setCursorPos(1,i)
+                window.blit(table.unpack(self.lines[i]))
+            end
+            return self
+        end
+    }
 end
 
 return Renderer
