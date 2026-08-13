@@ -29,7 +29,23 @@ import
     :setSourcePath("https://raw.githubusercontent.com/hexelll/ComBox/refs/heads/main/src")-- :setSourcePath()
 
 return setmetatable(
-    { import=import },
+    { 
+        import=import,
+        utils=setmetatable({},{
+            __index=function(self,k)
+                local data = import('utils/' .. k .. '.lua')
+                self[k] = data
+                return data
+            end
+        }),
+        combinators=setmetatable({},{
+            __index=function(self,k)
+                local data = import('combinators/' .. k .. '.lua')
+                self[k] = data
+                return data
+            end
+        })
+    },
     {
         __index=function(self,k)
             local data = import(k .. '.lua')

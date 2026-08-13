@@ -22,8 +22,8 @@ if not import then error("use import to use this file not require") end
 
 local ImageHandler = import "./image.lua"
 local Color = import "./color.lua"
-local png = import "./outsideLibs/png.lua"
-local qoi = import "./outsideLibs/qoi.lua"
+local png = import "./utils/png.lua"
+local qoi = import "./utils/qoi.lua"
 
 local MediaParser = {
     type='mediaParser',

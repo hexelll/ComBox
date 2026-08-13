@@ -1,6 +1,6 @@
 local PreCompiler = {}
 
-local BIT = import "outsideLibs/numberlua.lua".bit
+local BIT = import "utils/numberlua.lua".bit
 local Color = import "color.lua"
 
 local function round(x)
