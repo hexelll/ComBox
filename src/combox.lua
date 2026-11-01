@@ -26,7 +26,7 @@ local import = (function() local function a(b)local c=b:find("https")local d=b:f
 
 import
     :setCachePath("/ComBox") -- :setCachePath()
-    :setSourcePath("https://raw.githubusercontent.com/hexelll/ComBox/refs/heads/dev/src")-- :setSourcePath()
+    :setSourcePath("https://raw.githubusercontent.com/hexelll/ComBox/refs/heads/dev/src/")-- :setSourcePath()
 
 return setmetatable(
     { 
