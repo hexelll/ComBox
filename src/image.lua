@@ -81,6 +81,7 @@ function Image:new(sx,sy,default,data)
         end
         for i=1,sx*sy do
             if isColor then
+                local h = default:toHash(255)
                 o.colors[h][#o.colors[h]+1] = i
             end
             data[i] = default
